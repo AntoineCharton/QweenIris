@@ -11,7 +11,7 @@ namespace QweenIris
         private readonly string token;
         private readonly ulong chatChannelID;
 
-        public DiscordBot(Action<string, string, string, string, string> action, ulong instructionsID, ulong codeInstructionsID, ulong channelID)
+        public DiscordBot(Action<string, string, string, string, string, string> action, ulong instructionsID, ulong codeInstructionsID, ulong newsInstructionID, ulong channelID)
         {
             chatChannelID = channelID;
             this.client = new DiscordSocketClient();
@@ -43,6 +43,15 @@ namespace QweenIris
                             codeInstruction += " " + instructionMessage.Content;
                         }
 
+                        var newsInstructionChannel = client.GetChannel(newsInstructionID) as SocketTextChannel;
+                        var newsInstruction = "";
+                        var newsInstructionChannelMessages = await codeInstructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
+                        foreach (var instructionMessage in newsInstructionChannelMessages)
+                        {
+                            newsInstruction += " " + instructionMessage.Content;
+                        }
+
+
                         var channel = client.GetChannel(channelID) as SocketTextChannel;
                         var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
                         var history = await channel.GetMessagesAsync(limit: 20).FlattenAsync();
@@ -61,7 +70,7 @@ namespace QweenIris
                         var messageLooked = 0;
                         foreach (var message in messages)
                         {
-                            action.Invoke(instruction, codeInstruction, parsedHistory, message.Content, message.Author.Username);
+                            action.Invoke(instruction, codeInstruction, newsInstruction, parsedHistory, message.Content, message.Author.Username);
                         }
 
 

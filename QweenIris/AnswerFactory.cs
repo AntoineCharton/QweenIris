@@ -24,25 +24,28 @@ namespace QweenIris
             
         }
 
-        public async Task<IAnswer> GetAnswer(string prompt)
+        public async Task<IAnswer> GetAnswer(string prompt, string normalInstructions, string codeInstructions, string newsSearchInstructions)
         {
             var targetAnswer = await GetAppropriateAnswer(prompt);
             Console.WriteLine(targetAnswer);
             switch(targetAnswer)
             {
                 case 0:
-                    return new ComplexAnswer(thinkingModel);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(normalInstructions);
                 case 1:
-                    return new BasicAnswers(simpleModel);
+                    return new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
                 case 2:
-                    return new BasicAnswers(simpleModel);
+                    return new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
                 case 3:
                 case 4:
-                    return new BasicAnswers(thinkingModel);
+                    return new BasicAnswers(thinkingModel).SetInstructions(normalInstructions);
                 case 6:
-                    return new CodeAnswer(complexModel);
+                    return new CodeAnswer(complexModel).SetInstructions(codeInstructions);
+                case 9:
+                case 10:
+                    return new NewsSearch(complexModel).SetInstructions(newsSearchInstructions);
                 default:
-                    return new ComplexAnswer(thinkingModel);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(normalInstructions);
 
             }
                 
