@@ -1,8 +1,4 @@
-﻿using Discord;
-using Discord.WebSocket;
-using OllamaSharp;
-using System.IO;
-using System.Reflection.Metadata;
+﻿using OllamaSharp;
 using System.Text.RegularExpressions;
 
 namespace QweenIris
@@ -15,7 +11,7 @@ namespace QweenIris
         {
             var uri = new Uri("http://localhost:11434");
             ollama = new OllamaApiClient(uri);
-            ollama.SelectedModel = "qwen2.5vl";
+            ollama.SelectedModel = "deepseek-r1";
         }
 
         public async Task<bool> OnlineSearchRequested(string message)
