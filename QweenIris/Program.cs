@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using OllamaSharp;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace QweenIris
         private readonly WebFetcher webFetcher;
         private readonly DiscordBot discordBot;
         private readonly AnswerFactory answerFactory;
+        private int readMessageCount;
 
         static void Main(string[] args) =>
             new Program().StartBotAsync().GetAwaiter().GetResult();
@@ -20,6 +22,7 @@ namespace QweenIris
 
         public Program()
         {
+            Ollama.RestartOllama();
             discordBot = new DiscordBot(ReadMessage, 1392616212621557871, 1394400815191425045, 1394684362959884411, 1392593573551013958);
             webFetcher = new WebFetcher();
             answerFactory = new AnswerFactory();
@@ -27,6 +30,7 @@ namespace QweenIris
 
         private Task StartBotAsync()
         {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             return discordBot.StartAsync();
         }
 
@@ -44,30 +48,19 @@ namespace QweenIris
         {
             Console.WriteLine(" " +message);
             TriggerTyping();
-            var answerProvider = await answerFactory.GetAnswer(message, instructions, codeInstructions, newsSearchInstructions);
+            var answerProvider = await answerFactory.GetAnswer(message, history, instructions, codeInstructions, newsSearchInstructions, TriggerTyping);
             var answer  = await answerProvider.GetAnswer(history, message,  user, sendMessage, TriggerTyping);
+            readMessageCount++;
             Console.WriteLine(" " + answer);
             await discordBot.ReplyAsync(answer);
+            if(readMessageCount > 30)
+            {
+                readMessageCount = 0;
+                Ollama.RestartOllama();
+                Console.WriteLine("Restarting Ollama");
+            }
         }
     }
-
-    class ResponseType
-    {
-        public bool requireSearch;
-        public string promptAnswer;
-    }
-
-    public class WebFetcher
-    {
-        public async Task<string> GetHtmlAsync(string url)
-        {
-            using var httpClient = new HttpClient();
-            string html = await httpClient.GetStringAsync(url);
-            return html;
-        }
-    }
-
-
 
 public static class Config
     {

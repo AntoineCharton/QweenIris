@@ -1,0 +1,69 @@
+{
+  "mediaFeeds": [
+    {
+      "name": "BBC News",
+      "categories": [ "World", "Politics" ],
+      "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
+    },
+    {
+      "name": "CNN",
+      "categories": [ "World", "Politics" ],
+      "rss": "http://rss.cnn.com/rss/edition.rss"
+    },
+    {
+      "name": "The New York Times",
+      "categories": [ "US", "Politics", "World" ],
+      "rss": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+    },
+    {
+      "name": "The Guardian",
+      "categories": [ "World", "Politics", "Environment" ],
+      "rss": "https://www.theguardian.com/world/rss"
+    },
+    {
+      "name": "Fox News",
+      "categories": [ "US", "Politics", "Opinion" ],
+      "rss": "https://feeds.foxnews.com/foxnews/latest"
+    },
+    {
+      "name": "Fox News - World",
+      "categories": [ "World", "Politics" ],
+      "rss": "https://moxie.foxnews.com/google-publisher/world.xml"
+    },
+    {
+      "name": "NPR News",
+      "categories": [ "US", "Politics", "Culture" ],
+      "rss": "https://feeds.npr.org/1001/rss.xml"
+    },
+    {
+      "name": "Al Jazeera",
+      "categories": [ "World", "Middle East", "Politics" ],
+      "rss": "https://www.aljazeera.com/xml/rss/all.xml"
+    },
+    {
+      "name": "Le Monde (English)",
+      "categories": [ "World", "France", "Politics" ],
+      "rss": "https://www.lemonde.fr/en/rss/une.xml"
+    },
+    {
+      "name": "The Verge",
+      "categories": [ "Technology", "Gaming", "Culture" ],
+      "rss": "https://www.theverge.com/rss/index.xml"
+    },
+    {
+      "name": "Steam Free Games Group",
+      "categories": [ "Gaming", "Steam", "Promotions" ],
+      "rss": "https://steamcommunity.com/groups/GrabFreeGames/rss"
+    },
+    {
+      "name": "Kotaku - Steam",
+      "categories": [ "Gaming", "Steam", "News" ],
+      "rss": "https://kotaku.com/tag/steam/rss"
+    },
+    {
+      "name": "IGN",
+      "categories": [ "Gaming", "Entertainment", "Reviews" ],
+      "rss": "http://feeds.feedburner.com/ign/all"
+    }
+  ]
+}

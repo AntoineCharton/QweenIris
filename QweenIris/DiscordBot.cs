@@ -27,6 +27,7 @@ namespace QweenIris
                         if (message.Channel.Id != channelID || message.Author.IsBot)
                             return;
 
+                        Console.WriteLine("New message received:");
                         var instructionsChannel = client.GetChannel(instructionsID) as SocketTextChannel;
                         var instruction = "";
                         var instructionChannelMessages = await instructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
@@ -45,7 +46,7 @@ namespace QweenIris
 
                         var newsInstructionChannel = client.GetChannel(newsInstructionID) as SocketTextChannel;
                         var newsInstruction = "";
-                        var newsInstructionChannelMessages = await codeInstructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
+                        var newsInstructionChannelMessages = await newsInstructionChannel.GetMessagesAsync(limit: 1).FlattenAsync();
                         foreach (var instructionMessage in newsInstructionChannelMessages)
                         {
                             newsInstruction += " " + instructionMessage.Content;
@@ -112,6 +113,7 @@ namespace QweenIris
 
         public async Task TriggerTyping()
         {
+            Console.WriteLine("Trigger typing");
             var channel = client.GetChannel(chatChannelID) as SocketTextChannel;
             await channel.TriggerTypingAsync();
         }

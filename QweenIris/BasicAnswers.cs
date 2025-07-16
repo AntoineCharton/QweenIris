@@ -25,7 +25,6 @@ namespace QweenIris
             var formatedInstructions = $"Your instructions are: '{instructionsToFollow}'";
             user = $"The user name is: '{user}'";
             message = $"This is the message: '{message}'";
-            //history = $"This is the history of the conversation do not account for it unless the user ask you: '{history}' This is the end of the history";
             pingAlive.Invoke();
             await foreach (var stream in ollama.GenerateAsync(formatedInstructions + user + message))
             {

@@ -37,7 +37,7 @@ namespace QweenIris
             var count = 0;
             await foreach (var stream in ollama.GenerateAsync(formatedInstructions + history + user + message))
             {
-                if(count % 500 == 0)
+                if(count % 100 == 0)
                 {
                     pingAlive.Invoke();
                 }
