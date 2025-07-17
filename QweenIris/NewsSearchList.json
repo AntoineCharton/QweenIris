@@ -64,6 +64,16 @@
       "name": "IGN",
       "categories": [ "Gaming", "Entertainment", "Reviews" ],
       "rss": "http://feeds.feedburner.com/ign/all"
+    },
+    {
+      "name": "Steam promotions",
+      "categories": [ "Gaming", "Entertainment", "Promotions" ],
+      "rss": "https://www.cheapshark.com/api/1.0/deals?storeID=1&output=rss"
+    },
+    {
+      "name": "La presse",
+      "categories": [ "Canada", "News", "Culture" ],
+      "rss": "https://www.lapresse.ca/actualites/rss"
     }
   ]
 }

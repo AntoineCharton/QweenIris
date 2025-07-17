@@ -1,0 +1,36 @@
+{
+  "Prompts": [
+    {
+      "Prompt": "Researching factual information (e.g., “who was the first president of France?”, “how many countries use the euro?”)",
+      "Categories": 3
+    },
+    {
+      "Prompt": "Looking for current events or recent updates (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “what’s in today’s paper?”)",
+      "Categories": 3
+    },
+    {
+      "Prompt": "Looking for something that could be found online (e.g., “Any steam promotions?”, “Can you look online?”)",
+      "Categories": 3
+    },
+    {
+      "Prompt": "Technical help or anything related to coding, programming, or software (e.g., “what’s wrong with this Python code?”, “how to fix a null reference error?”)",
+      "Categories": 2
+    },
+    {
+      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., “how does the stock market work?”, “what is entropy?”)",
+      "Categories": 1
+    },
+    {
+      "Prompt": "Casual greeting (e.g., “hi”, “hello”, “hey”, “yo”, “good morning”)",
+      "Categories": 0
+    },
+    {
+      "Prompt": "General conversation or open-ended chatting (e.g., “what’s on your mind?”, “let’s talk”, “how was your day?”)",
+      "Categories": 0
+    }
+  ],
+  "UserIntroduction": "User request: ",
+  "AffirmationOneIntroduction": " \n Affirmation one: ",
+  "AffirmationTwoIntroduction": " \n Affirmation two: ",
+  "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation. Return only a number 1 or 2 no explanation."
+}

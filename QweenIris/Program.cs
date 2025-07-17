@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using OllamaSharp;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -20,8 +21,27 @@ namespace QweenIris
             new Program().StartBotAsync().GetAwaiter().GetResult();
 
 
+        [DllImport("kernel32.dll")]
+        public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+        private const uint ENABLE_EXTENDED_FLAGS = 0x0080;
+
+        private static void DisableQuickEditMode()
+        {
+            // Disable QuickEdit Mode
+            // Quick Edit mode freezes the app to let users select text.
+            // We don't want that. We want the app to run smoothly in the background.
+            // - https://stackoverflow.com/q/4453692
+            // - https://stackoverflow.com/a/4453779
+            // - https://stackoverflow.com/a/30517482
+
+            IntPtr handle = Process.GetCurrentProcess().MainWindowHandle;
+            SetConsoleMode(handle, ENABLE_EXTENDED_FLAGS);
+        }
+
         public Program()
         {
+            DisableQuickEditMode();
             Ollama.RestartOllama();
             discordBot = new DiscordBot(ReadMessage, 1392616212621557871, 1394400815191425045, 1394684362959884411, 1392593573551013958);
             webFetcher = new WebFetcher();

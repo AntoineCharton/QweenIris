@@ -9,24 +9,28 @@ namespace QweenIris
 {
     internal class NewsSearch : IAnswer
     {
-        private readonly OllamaApiClient ollama;
+        private readonly OllamaApiClient newsModel;
+        private readonly OllamaApiClient normalModel;
         private readonly WebFetcher webFetcher;
-        private string instructionsToFollow;
+        private string newsInstructionsToFollow;
+        private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
 
-        public NewsSearch(OllamaApiClient model)
+        public NewsSearch(OllamaApiClient newsModel, OllamaApiClient normalModel)
         {
             webFetcher = new WebFetcher();
             // set up the client
-            ollama = model;
+            this.newsModel = newsModel;
+            this.normalModel = normalModel;
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewsSearchList.json");
             string json = File.ReadAllText(path, Encoding.UTF8);
             mediaFeedList = JsonSerializer.Deserialize<MediaFeedList>(json);
         }
 
-        public NewsSearch SetInstructions(string instructions)
+        public NewsSearch SetInstructions(string newsInstructions, string normalInstructions)
         {
-            instructionsToFollow = instructions;
+            newsInstructionsToFollow = newsInstructions;
+            normalInstructionsToFollow = normalInstructions;
             return this;
         }
 
@@ -44,24 +48,24 @@ namespace QweenIris
             }
         }
 
-        public async Task<string> GetRelevantArticle(string feed, string message, Action pingAlive)
+        public async Task<string> GetRelevantArticle(string feed, string message, Action pingAlive, Action<string> feedback)
         {
             
-            var npr = new RSS2Parser();
+            var article = new RSS2Parser();
             try
             {
-                await npr.ParseRss(webFetcher, feed);
+                await article.ParseRss(webFetcher, feed);
                 var newsArticles = "";
-                for (var i = 0; i < npr.Items.Count; i++)
+                for (var i = 0; i < article.Items.Count; i++)
                 {
                     newsArticles += $"--{i}--";
-                    newsArticles += npr.Items[i].ToString() + "\n";
+                    newsArticles += article.Items[i].ToString() + "\n";
                 }
 
                 var pickCount = 0;
                 var instruction = "Pick one article here that would match the user request. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
                 var pickedArticle = "";
-                await foreach (var stream in ollama.GenerateAsync(newsArticles + instruction + message))
+                await foreach (var stream in newsModel.GenerateAsync(newsArticles + instruction + message))
                 {
                     if (pickCount % 500 == 0)
                     {
@@ -74,8 +78,9 @@ namespace QweenIris
                 var pickedArticleId = int.Parse(pickedArticle);
                 if (pickedArticleId != -1)
                 {
-                    Console.WriteLine(npr.Items[pickedArticleId].ToString());
-                    return "\n" + npr.Items[pickedArticleId].ToString();
+                    Console.WriteLine(article.Items[pickedArticleId].ToString());
+                    await PushWaitingAnswer(feedback, $"Instructions: Tell the user you found an article matching the prompt give a short heads up on the article. Do not say hi or ask questions. {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
+                    return "\n" + article.Items[pickedArticleId].ToString();
                 }
             }
             catch (Exception e)
@@ -86,22 +91,33 @@ namespace QweenIris
             return "";
         }
 
+        public async Task PushWaitingAnswer(Action<string> feedback, string prompt)
+        {
+            var waitingResponse = "";
+            await foreach (var stream in normalModel.GenerateAsync(prompt))
+            {
+                waitingResponse += stream.Response;
+            }
+            waitingResponse = Regex.Replace(waitingResponse, @"<think>[\s\S]*?</think>", "");
+            feedback.Invoke(waitingResponse);
+        }
+
         public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
-            feedback.Invoke("Looking online for articles.");
+            PushWaitingAnswer(feedback, $"Instructions: acknowledge the prompt with a short sentance and tell the user you are looking online. Do not say hi or ask questions. {normalInstructionsToFollow} \n prompt:{message}");
             var relevantArticles = "";
             var numberOfArticles = 0;
             foreach (var feed in mediaFeedList.MediaFeeds)
             {
-                var newArticle = await GetRelevantArticle(feed.Rss, message, pingAlive);
+                var newArticle = await GetRelevantArticle(feed.Rss, message, pingAlive, feedback);
                 relevantArticles += newArticle;
                 if(!string.IsNullOrWhiteSpace(newArticle))
                 {
                     numberOfArticles++;
                 }
 
-                if(numberOfArticles > 1)
+                if(numberOfArticles > 2)
                 {
                     break;
                 }
@@ -110,13 +126,13 @@ namespace QweenIris
             var synthetised = relevantArticles;
             var response = "";
             var date = $"This is the date {DateTime.Now}";
-            var formatedInstruction = $"Your instructions are: '{instructionsToFollow}'" + date;
+            var formatedInstruction = $"Your instructions are: '{newsInstructionsToFollow}'" + date;
             user = $"The user name is: '{user}'";
             message = $"This is the message: '{message}'";
             var parsedInformations = synthetised;
             pingAlive.Invoke();
             var count = 0;
-            await foreach (var stream in ollama.GenerateAsync(formatedInstruction + parsedInformations + user + message))
+            await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + parsedInformations + user + message))
             {
                 if (count % 500 == 0)
                 {

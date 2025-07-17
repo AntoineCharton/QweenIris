@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="FactoryInstructions.json" />
     <None Remove="NewsSearchList.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="FactoryInstructions.txt">
+    <Content Include="FactoryInstructions.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="NewsSearchList.json">
