@@ -55,7 +55,7 @@ namespace QweenIris
 
                         var channel = client.GetChannel(channelID) as SocketTextChannel;
                         var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        var history = await channel.GetMessagesAsync(limit: 20).FlattenAsync();
+                        var history = await channel.GetMessagesAsync(limit: 50).FlattenAsync();
                         var parsedHistory = "";
 
                         var currentPastMessageLooked = 0;

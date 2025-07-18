@@ -1,32 +1,32 @@
-{
+ï»¿{
   "Prompts": [
     {
-      "Prompt": "Researching factual information (e.g., “who was the first president of France?”, “how many countries use the euro?”)",
-      "Categories": 3
-    },
-    {
-      "Prompt": "Looking for current events or recent updates (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “what’s in today’s paper?”)",
-      "Categories": 3
-    },
-    {
-      "Prompt": "Looking for something that could be found online (e.g., “Any steam promotions?”, “Can you look online?”)",
-      "Categories": 3
-    },
-    {
-      "Prompt": "Technical help or anything related to coding, programming, or software (e.g., “what’s wrong with this Python code?”, “how to fix a null reference error?”)",
-      "Categories": 2
-    },
-    {
-      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., “how does the stock market work?”, “what is entropy?”)",
+      "Prompt": "Researching factual information (e.g., â€œwho was the first president of France?â€, â€œhow many countries use the euro?â€)",
       "Categories": 1
     },
     {
-      "Prompt": "Casual greeting (e.g., “hi”, “hello”, “hey”, “yo”, “good morning”)",
+      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., â€œwhatâ€™s going on in Canada today?â€, â€œany news on the wildfires?â€, â€œwhatâ€™s in todayâ€™s paper?â€, â€œCan you look online?â€, â€œAny steam promotions?â€, â€œWhat's going on in the world?â€)",
+      "Categories": 3
+    },
+    {
+      "Prompt": "Technical help or anything related to coding, programming, or software (e.g., â€œwhatâ€™s wrong with this Python code?â€, â€œhow to fix a null reference error?â€)",
+      "Categories": 2
+    },
+    {
+      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., ï¿½how does the stock market work?ï¿½, ï¿½what is entropy?ï¿½)",
+      "Categories": 1
+    },
+    {
+      "Prompt": "General conversation or open-ended chatting (e.g., â€œwhatâ€™s on your mind?â€, â€œletâ€™s talkâ€, â€œhow was your day?â€)",
       "Categories": 0
     },
     {
-      "Prompt": "General conversation or open-ended chatting (e.g., “what’s on your mind?”, “let’s talk”, “how was your day?”)",
+      "Prompt": "Casual greeting (e.g., ï¿½hiï¿½, ï¿½helloï¿½, ï¿½heyï¿½, ï¿½yoï¿½, ï¿½good morningï¿½)",
       "Categories": 0
+    },
+    {
+      "Prompt": "User is refering to a past conversation, or there message lake context (e.g., â€œWhat do you mean?â€, â€œThat's not what I askedâ€, â€œWrong!â€, â€œWhat did we talk about?â€, â€œWhat was the topic of the conversation?â€. â€œI don't understandâ€)",
+      "Categories": 1
     }
   ],
   "UserIntroduction": "User request: ",

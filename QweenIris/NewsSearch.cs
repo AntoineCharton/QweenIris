@@ -105,7 +105,7 @@ namespace QweenIris
         public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
-            PushWaitingAnswer(feedback, $"Instructions: acknowledge the prompt with a short sentance and tell the user you are looking online. Do not say hi or ask questions. {normalInstructionsToFollow} \n prompt:{message}");
+            PushWaitingAnswer(feedback, $"Instructions: acknowledge the prompt with a short sentance and tell the user you are looking online. Do not say hi or ask questions. Do not say iris. Do not say your age. {normalInstructionsToFollow} \n prompt:{message}");
             var relevantArticles = "";
             var numberOfArticles = 0;
             foreach (var feed in mediaFeedList.MediaFeeds)
@@ -129,10 +129,11 @@ namespace QweenIris
             var formatedInstruction = $"Your instructions are: '{newsInstructionsToFollow}'" + date;
             user = $"The user name is: '{user}'";
             message = $"This is the message: '{message}'";
+            history = $"This is the history of the conversation: '{history}'";
             var parsedInformations = synthetised;
             pingAlive.Invoke();
             var count = 0;
-            await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + parsedInformations + user + message))
+            await foreach (var stream in newsModel.GenerateAsync(history + formatedInstruction + parsedInformations + user + message))
             {
                 if (count % 500 == 0)
                 {
