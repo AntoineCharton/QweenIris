@@ -2,52 +2,52 @@
   "mediaFeeds": [
     {
       "name": "BBC News",
-      "categories": [ "World", "Politics" ],
+      "categories": [ "Any" ],
       "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
     },
     {
       "name": "CNN",
-      "categories": [ "World", "Politics" ],
+      "categories": [ "America", "World", "Politics" ],
       "rss": "http://rss.cnn.com/rss/edition.rss"
     },
     {
       "name": "The New York Times",
-      "categories": [ "US", "Politics", "World" ],
+      "categories": [ "America", "Politics", "World" ],
       "rss": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
     },
     {
       "name": "The Guardian",
-      "categories": [ "World", "Politics", "Environment" ],
+      "categories": [ "Europe", "World", "Politics", "Environment" ],
       "rss": "https://www.theguardian.com/world/rss"
     },
     {
       "name": "Fox News",
-      "categories": [ "US", "Politics", "Opinion" ],
+      "categories": [ "America", "Politics"],
       "rss": "https://feeds.foxnews.com/foxnews/latest"
     },
     {
       "name": "Fox News - World",
-      "categories": [ "World", "Politics" ],
+      "categories": [ "Any"],
       "rss": "https://moxie.foxnews.com/google-publisher/world.xml"
     },
     {
       "name": "NPR News",
-      "categories": [ "US", "Politics", "Culture" ],
+      "categories": [ "America", "Politics", "Culture" ],
       "rss": "https://feeds.npr.org/1001/rss.xml"
     },
     {
       "name": "Al Jazeera",
-      "categories": [ "World", "Middle East", "Politics" ],
+      "categories": [ "Any" ],
       "rss": "https://www.aljazeera.com/xml/rss/all.xml"
     },
     {
       "name": "Le Monde (English)",
-      "categories": [ "World", "France", "Politics" ],
+      "categories": [ "Any" ],
       "rss": "https://www.lemonde.fr/en/rss/une.xml"
     },
     {
       "name": "The Verge",
-      "categories": [ "Technology", "Gaming", "Culture" ],
+      "categories": [ "Technology", "Gaming", "Culture"],
       "rss": "https://www.theverge.com/rss/index.xml"
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "name": "IGN",
-      "categories": [ "Gaming", "Entertainment", "Reviews" ],
+      "categories": [ "Gaming", "Entertainment", "Technology" ],
       "rss": "http://feeds.feedburner.com/ign/all"
     },
     {
@@ -67,8 +67,13 @@
     },
     {
       "name": "La presse",
-      "categories": [ "Canada", "News", "Culture" ],
+      "categories": [ "America", "Culture", "Politics"],
       "rss": "https://www.lapresse.ca/actualites/rss"
+    },
+    {
+      "name": "science daily",
+      "categories": [ "Science", "Culture", "Technology" ],
+      "rss": "https://www.sciencedaily.com/rss/top.xml"
     }
   ]
 }

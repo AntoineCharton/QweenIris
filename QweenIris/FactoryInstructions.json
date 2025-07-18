@@ -5,11 +5,19 @@
       "Categories": 1
     },
     {
-      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “what’s in today’s paper?”, “Can you look online?”, “Any steam promotions?”, “What's going on in the world?”, “What's happening in the world?”)",
+      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “Can you look online?”, “Any steam promotions?”)",
+      "Categories": 3
+    },
+    {
+      "Prompt": "Looking for headlines (e.g., “any news on the wildfires?”, “what’s in today’s paper?”, “What's going on in the world?”, “What's happening in the world?”, “What's going on in the tech industry?”)",
       "Categories": 3
     },
     {
       "Prompt": "Technical help or anything related to coding, programming, or software (e.g., “what’s wrong with this Python code?”, “how to fix a null reference error?”)",
+      "Categories": 2
+    },
+    {
+      "Prompt": "Contains a lot of coding characters like {}[] and or code",
       "Categories": 2
     },
     {
@@ -21,12 +29,16 @@
       "Categories": 0
     },
     {
-      "Prompt": "Casual greeting (e.g., “hi�, “hello�, “hey”, “yo”, “good morning”)",
+      "Prompt": "Casual greeting (e.g., “hi”, “hello”, “hey”, “yo”, “good morning”)",
       "Categories": 0
     },
     {
       "Prompt": "User is refering to a past conversation, or there message lake context (e.g., “What do you mean?”, “That's not what I asked”, “Wrong!”, “What did we talk about?”, “What was the topic of the conversation?”. “I don't understand”)",
       "Categories": 1
+    },
+    {
+      "Prompt": "The user is being gratefull and complimenting you (e.g., “Thank you!”, “You are awesome”, “Good job!”)",
+      "Categories": 0
     }
   ],
   "UserIntroduction": "User request: ",

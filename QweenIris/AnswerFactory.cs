@@ -37,25 +37,54 @@ namespace QweenIris
 
         }
 
+        private int CountBraces(string sentence)
+        {
+            var count = 0;
+            foreach (char c in sentence)
+            {
+                if (c == '{') count++;
+                else if (c == '}') count++;
+                else if (c == '[') count++;
+                else if (c == ']') count++;
+            }
+            return count;
+        }
+
         public async Task<IAnswer> GetAnswer(string prompt, string history, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string> feedback)
         {
+            var codeElements = CountBraces(prompt);
+            Console.WriteLine(codeElements);
+            if (codeElements > 4)
+            {
+                return new CodeAnswer(complexModel).SetInstructions(codeInstructions);
+            }    
             var targetModel = 0;
             var mostProbableInformation = 0;
-            var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
-            feedback.Invoke(await basicAnswer.GetAnswer("", prompt, user, feedback, pingAlive));
+            var searchModel = simpleModel;
+            if (prompt.Length < 100)
+            {
+                var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions + " Do not share any links");
+                feedback.Invoke(await basicAnswer.GetAnswer("", prompt, user, feedback, pingAlive));
+            }
+            else
+            {
+                searchModel = thinkingModel;
+            }
             for(var i = 1; i < promptsList.Prompts.Count; i += 2)
             {
                 var affirmationOne = promptsList.Prompts[mostProbableInformation].Prompt;
                 var affirmationTwo = promptsList.Prompts[i].Prompt;
-                var affirmationThree = promptsList.Prompts[i+1].Prompt;
+                var nextStep = i + 1;
+                if (i + 1 >= promptsList.Prompts.Count)
+                    nextStep = i;
+                var affirmationThree = promptsList.Prompts[nextStep].Prompt;
                 var formatedPrompt = promptsList.UserIntroduction + prompt +
                     promptsList.AffirmationOneIntroduction + affirmationOne +
                     promptsList.AffirmationTwoIntroduction + affirmationTwo +
                     promptsList.AffirmationThreeIntroduction + affirmationThree +
                     promptsList.ParsePromptInstructions;
 
-                var targetAnswer = await GetAppropriateAnswer(formatedPrompt, history, simpleModel, pingAlive);
-                Console.WriteLine(formatedPrompt);
+                var targetAnswer = await GetAppropriateAnswer(formatedPrompt, history, searchModel, pingAlive);
                 if (targetAnswer == 2)
                 {
                     mostProbableInformation = i;
@@ -63,8 +92,6 @@ namespace QweenIris
                 {
                     mostProbableInformation = i+1;
                 }
-
-                //Console.WriteLine(formatedPrompt);
             }
 
             targetModel = promptsList.Prompts[mostProbableInformation].Categories;

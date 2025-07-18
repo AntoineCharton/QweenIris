@@ -1,5 +1,6 @@
 ﻿using OllamaSharp;
 using OllamaSharp.Models.Chat;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -48,9 +49,31 @@ namespace QweenIris
             }
         }
 
+        private void KeepMatchedFeeds(List<MediaFeeds> feeds, params string[] categories)
+        {
+            HashSet<string> categorySet = new HashSet<string>(categories);
+            foreach (var feed in feeds.ToList())
+            {
+                bool shouldRemove = true;
+
+                foreach (string category in feed.Categories)
+                {
+                    if (categorySet.Contains(category))
+                    {
+                        shouldRemove = false;
+                        break;
+                    }
+                }
+
+                if (shouldRemove)
+                {
+                    feeds.Remove(feed);
+                }
+            }
+        }
+
         public async Task<string> GetRelevantArticle(string feed, string message, Action pingAlive, Action<string> feedback)
         {
-            
             var article = new RSS2Parser();
             try
             {
@@ -102,10 +125,48 @@ namespace QweenIris
             feedback.Invoke(waitingResponse);
         }
 
+        public async Task<string> GenerateMatchingTags(Action<string> feedback, string prompt)
+        {
+            HashSet<string> uniqueCategories = new HashSet<string>();
+
+            foreach (var MediaFeed in mediaFeedList.MediaFeeds)
+            {
+                foreach (string category in MediaFeed.Categories)
+                {
+                    uniqueCategories.Add(category);
+                }
+            }
+
+            var items = "";
+            Console.WriteLine("Unique categories:");
+            foreach (string category in uniqueCategories)
+            {
+                items += ", " + category;
+                Console.WriteLine("- " + category);
+            }
+
+            var pickedCategory = "";
+            Console.WriteLine(items);
+            var instructions = $"Which one of those categories matches the best the request: {items}, your instructions are to pick one that matches the user prompt best. Return only the category, no explanation. \n Request: {prompt}";
+            await foreach (var stream in normalModel.GenerateAsync(instructions))
+            {
+                pickedCategory += stream.Response;
+            }
+            pickedCategory = Regex.Replace(pickedCategory, @"<think>[\s\S]*?</think>", "");
+            pickedCategory = Regex.Replace(pickedCategory, @"\s", "");
+            Console.WriteLine("Picked: " + pickedCategory);
+            return pickedCategory;
+        }
+
         public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
-            PushWaitingAnswer(feedback, $"Instructions: End your sentance by 'I am looking for an article for you.'. {normalInstructionsToFollow} \n prompt:{message}");
+            List<string> categoriesToMatch = new List<string> {};
+            var pickedCategory = await GenerateMatchingTags(feedback, message);
+            categoriesToMatch.Add(pickedCategory);
+            categoriesToMatch.Add("Any");
+            KeepMatchedFeeds(mediaFeedList.MediaFeeds, categoriesToMatch.ToArray());
+            await PushWaitingAnswer(feedback, $"Instructions: End your sentance by 'I am looking for an article.'. {normalInstructionsToFollow} \n prompt:{message}");
             var relevantArticles = "";
             var numberOfArticles = 0;
             foreach (var feed in mediaFeedList.MediaFeeds)
@@ -123,17 +184,33 @@ namespace QweenIris
                 }
 
             }
-            var synthetised = relevantArticles;
+
+            if(numberOfArticles == 0)
+            {
+                var nothingMessage = "";
+                var wordCount = 0;
+                await foreach (var stream in normalModel.GenerateAsync("User message: " + message + normalInstructionsToFollow + "Say you couldn't find anything. Do not include any link"))
+                {
+                    if (wordCount % 500 == 0)
+                    {
+                        pingAlive.Invoke();
+                    }
+                    wordCount++;
+                    nothingMessage += stream.Response;
+                }
+                nothingMessage = Regex.Replace(nothingMessage, @"<think>[\s\S]*?</think>", "");
+                return nothingMessage;
+            }
+
             var response = "";
-            var date = $"This is the date {DateTime.Now}";
+            var date = $"This is the year {DateTime.Now.Year}";
             var formatedInstruction = $"Your instructions are: '{newsInstructionsToFollow}'" + date;
             user = $"The user name is: '{user}'";
             message = $"This is the message: '{message}'";
             history = $"This is the history of the conversation: '{history}'";
-            var parsedInformations = synthetised;
             pingAlive.Invoke();
             var count = 0;
-            await foreach (var stream in newsModel.GenerateAsync(history + formatedInstruction + parsedInformations + user + message))
+            await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))
             {
                 if (count % 500 == 0)
                 {
@@ -142,9 +219,8 @@ namespace QweenIris
                 count++;
                 response += stream.Response;
             }
-            Console.WriteLine(response);
-            string output = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
-            return output;
+            response = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
+            return response;
         }
     }
 
