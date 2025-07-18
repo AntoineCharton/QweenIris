@@ -5,7 +5,7 @@
       "Categories": 1
     },
     {
-      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “what’s in today’s paper?”, “Can you look online?”, “Any steam promotions?”, “What's going on in the world?”)",
+      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “what’s in today’s paper?”, “Can you look online?”, “Any steam promotions?”, “What's going on in the world?”, “What's happening in the world?”)",
       "Categories": 3
     },
     {
@@ -13,15 +13,15 @@
       "Categories": 2
     },
     {
-      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., �how does the stock market work?�, �what is entropy?�)",
+      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., “how does the stock market work?�, “what is entropy?”)",
       "Categories": 1
     },
     {
-      "Prompt": "General conversation or open-ended chatting (e.g., “what’s on your mind?”, “let’s talk”, “how was your day?”)",
+      "Prompt": "General conversation or open-ended chatting (e.g., “what’s on your mind?”, “let’s talk”, “how was your day?”, “what's up?”, “how are you?”)",
       "Categories": 0
     },
     {
-      "Prompt": "Casual greeting (e.g., �hi�, �hello�, �hey�, �yo�, �good morning�)",
+      "Prompt": "Casual greeting (e.g., “hi�, “hello�, “hey”, “yo”, “good morning”)",
       "Categories": 0
     },
     {
@@ -32,5 +32,6 @@
   "UserIntroduction": "User request: ",
   "AffirmationOneIntroduction": " \n Affirmation one: ",
   "AffirmationTwoIntroduction": " \n Affirmation two: ",
-  "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation. Return only a number 1 or 2 no explanation."
+  "AffirmationThreeIntroduction": " \n Affirmation three: ",
+  "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation two, 3 if affirmation three. Return only a number 1, 2 or 3 no explanation."
 }

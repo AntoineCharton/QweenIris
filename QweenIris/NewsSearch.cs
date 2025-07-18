@@ -63,7 +63,7 @@ namespace QweenIris
                 }
 
                 var pickCount = 0;
-                var instruction = "Pick one article here that would match the user request. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
+                var instruction = "Pick one article here that would match the user request. If the request is vague, pick articles that are good news or cover light subjects. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
                 var pickedArticle = "";
                 await foreach (var stream in newsModel.GenerateAsync(newsArticles + instruction + message))
                 {
@@ -79,7 +79,7 @@ namespace QweenIris
                 if (pickedArticleId != -1)
                 {
                     Console.WriteLine(article.Items[pickedArticleId].ToString());
-                    await PushWaitingAnswer(feedback, $"Instructions: Tell the user you found an article matching the prompt give a short heads up on the article. Do not say hi or ask questions. {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
+                    await PushWaitingAnswer(feedback, $"Instructions: Describe what you see. End your sentance by 'I am looking for an article for you.'. {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
                     return "\n" + article.Items[pickedArticleId].ToString();
                 }
             }
@@ -105,7 +105,7 @@ namespace QweenIris
         public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
-            PushWaitingAnswer(feedback, $"Instructions: acknowledge the prompt with a short sentance and tell the user you are looking online. Do not say hi or ask questions. Do not say iris. Do not say your age. {normalInstructionsToFollow} \n prompt:{message}");
+            PushWaitingAnswer(feedback, $"Instructions: End your sentance by 'I am looking for an article for you.'. {normalInstructionsToFollow} \n prompt:{message}");
             var relevantArticles = "";
             var numberOfArticles = 0;
             foreach (var feed in mediaFeedList.MediaFeeds)

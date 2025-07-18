@@ -56,11 +56,6 @@
       "rss": "https://steamcommunity.com/groups/GrabFreeGames/rss"
     },
     {
-      "name": "Kotaku - Steam",
-      "categories": [ "Gaming", "Steam", "News" ],
-      "rss": "https://kotaku.com/tag/steam/rss"
-    },
-    {
       "name": "IGN",
       "categories": [ "Gaming", "Entertainment", "Reviews" ],
       "rss": "http://feeds.feedburner.com/ign/all"

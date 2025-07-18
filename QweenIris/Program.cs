@@ -43,7 +43,7 @@ namespace QweenIris
         {
             DisableQuickEditMode();
             Ollama.RestartOllama();
-            discordBot = new DiscordBot(ReadMessage, 1392616212621557871, 1394400815191425045, 1394684362959884411, 1392593573551013958);
+            discordBot = new DiscordBot(ReadMessage, 1395806358208643184, 1392616212621557871, 1394400815191425045, 1394684362959884411, 1392593573551013958);
             webFetcher = new WebFetcher();
             answerFactory = new AnswerFactory();
         }
@@ -64,20 +64,23 @@ namespace QweenIris
             await discordBot.ReplyAsync(message);
         }
 
-        private async void ReadMessage(string instructions, string codeInstructions, string newsSearchInstructions, string history, string message, string user)
+        private async void ReadMessage(string characterID, string instructions, string codeInstructions, string newsSearchInstructions, string history, string message, string user)
         {
             Console.WriteLine(" " +message);
             TriggerTyping();
-            var answerProvider = await answerFactory.GetAnswer(message, history, instructions, codeInstructions, newsSearchInstructions, TriggerTyping);
-            var answer  = await answerProvider.GetAnswer(history, message,  user, sendMessage, TriggerTyping);
-            readMessageCount++;
-            Console.WriteLine(" " + answer);
-            await discordBot.ReplyAsync(answer);
-            if(readMessageCount > 30)
+            var answerProvider = await answerFactory.GetAnswer(message, history, characterID, instructions, codeInstructions, newsSearchInstructions, user, TriggerTyping, sendMessage);
+            if (answerProvider != null)
             {
-                readMessageCount = 0;
-                Ollama.RestartOllama();
-                Console.WriteLine("Restarting Ollama");
+                var answer = await answerProvider.GetAnswer(history, message, user, sendMessage, TriggerTyping);
+                readMessageCount++;
+                Console.WriteLine(" " + answer);
+                await discordBot.ReplyAsync(answer);
+                if (readMessageCount > 30)
+                {
+                    readMessageCount = 0;
+                    Ollama.RestartOllama();
+                    Console.WriteLine("Restarting Ollama");
+                }
             }
         }
     }
