@@ -22,17 +22,12 @@
     },
     {
       "name": "Fox News",
-      "categories": [ "America", "Politics"],
+      "categories": [ "Any" ],
       "rss": "https://feeds.foxnews.com/foxnews/latest"
     },
     {
-      "name": "Fox News - World",
-      "categories": [ "Any"],
-      "rss": "https://moxie.foxnews.com/google-publisher/world.xml"
-    },
-    {
       "name": "NPR News",
-      "categories": [ "America", "Politics", "Culture" ],
+      "categories": [ "Any"],
       "rss": "https://feeds.npr.org/1001/rss.xml"
     },
     {
@@ -42,18 +37,13 @@
     },
     {
       "name": "Le Monde (English)",
-      "categories": [ "Any" ],
+      "categories": [ "Politics", "Culture", "Europe", "World"],
       "rss": "https://www.lemonde.fr/en/rss/une.xml"
     },
     {
       "name": "The Verge",
       "categories": [ "Technology", "Gaming", "Culture"],
       "rss": "https://www.theverge.com/rss/index.xml"
-    },
-    {
-      "name": "Steam Free Games Group",
-      "categories": [ "Gaming", "Steam", "Promotions" ],
-      "rss": "https://steamcommunity.com/groups/GrabFreeGames/rss"
     },
     {
       "name": "IGN",

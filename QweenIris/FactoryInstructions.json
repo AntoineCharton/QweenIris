@@ -5,11 +5,11 @@
       "Categories": 1
     },
     {
-      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “Can you look online?”, “Any steam promotions?”)",
+      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “Can you search for promotions?”, “Can you look online?”, “Any steam promotions?”)",
       "Categories": 3
     },
     {
-      "Prompt": "Looking for headlines (e.g., “any news on the wildfires?”, “what’s in today’s paper?”, “What's going on in the world?”, “What's happening in the world?”, “What's going on in the tech industry?”)",
+      "Prompt": "Looking for headlines (e.g., “any news on the wildfires?”, “what’s in today’s paper?”, “what's going on in the world?”, “what's happening in the world?”, “what's going on in the tech industry?”)",
       "Categories": 3
     },
     {
@@ -33,7 +33,11 @@
       "Categories": 0
     },
     {
-      "Prompt": "User is refering to a past conversation, or there message lake context (e.g., “What do you mean?”, “That's not what I asked”, “Wrong!”, “What did we talk about?”, “What was the topic of the conversation?”. “I don't understand”)",
+      "Prompt": "User is refering to a past conversation, or there message lake context (e.g., “What do you mean?”,  “What did we talk about?”, “What was the topic of the conversation?”,  “Explain to me what we have been talking about?” )",
+      "Categories": 1
+    },
+    {
+      "Prompt": "User is not happy about a past conversation (e.g.,“That's not what I asked”, “Wrong!”, “I don't understand”)",
       "Categories": 1
     },
     {
