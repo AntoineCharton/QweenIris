@@ -1,14 +1,7 @@
-﻿using Discord.WebSocket;
-using OllamaSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using OllamaSharp;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace QweenIris
 {
@@ -66,7 +59,7 @@ namespace QweenIris
             }
             else
             {
-                searchModel = thinkingModel;
+                searchModel = simpleModel;
             }
             for(var i = 1; i < promptsList.Prompts.Count; i += 2)
             {
