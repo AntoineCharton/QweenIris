@@ -5,11 +5,11 @@
       "Categories": 1
     },
     {
-      "Prompt": "Looking for current events or recent updates, or something that could be found online (e.g., “what’s going on in Canada today?”, “any news on the wildfires?”, “Can you search for promotions?”, “Can you look online?”, “Any steam promotions?”)",
+      "Prompt": "Looking for current events or recent updates (e.g., “what’s going on in Canada today?”, “Search online”)",
       "Categories": 3
     },
     {
-      "Prompt": "Looking for headlines (e.g., “any news on the wildfires?”, “what’s in today’s paper?”, “what's going on in the world?”, “what's happening in the world?”, “what's going on in the tech industry?”)",
+      "Prompt": "Looking for headlines (e.g., “any news on the wildfires?”, “what’s in today’s paper?”)",
       "Categories": 3
     },
     {
@@ -17,37 +17,38 @@
       "Categories": 2
     },
     {
-      "Prompt": "Contains a lot of coding characters like {}[] and or code",
-      "Categories": 2
-    },
-    {
-      "Prompt": "Learning or trying to understand general (non-coding) concepts (e.g., “how does the stock market work?�, “what is entropy?”)",
+      "Prompt": "Learning or trying to understand general concepts (e.g., “how does the stock market work?”, “what is entropy?”)",
       "Categories": 1
     },
     {
-      "Prompt": "General conversation or open-ended chatting (e.g., “what’s on your mind?”, “let’s talk”, “how was your day?”, “what's up?”, “how are you?”)",
+      "Prompt": "Casual greeting (e.g., “hi”, “hello”, “good morning”)",
       "Categories": 0
     },
     {
-      "Prompt": "Casual greeting (e.g., “hi”, “hello”, “hey”, “yo”, “good morning”)",
-      "Categories": 0
-    },
-    {
-      "Prompt": "User is refering to a past conversation, or there message lake context (e.g., “What do you mean?”,  “What did we talk about?”, “What was the topic of the conversation?”,  “Explain to me what we have been talking about?” )",
+      "Prompt": "User is refering to a past conversation (e.g., “What do you mean?”,  “What did we talk about?”)",
       "Categories": 1
     },
     {
-      "Prompt": "User is not happy about a past conversation (e.g.,“That's not what I asked”, “Wrong!”, “I don't understand”)",
+      "Prompt": "User is not happy about a past conversation (e.g.,“That's not what I asked”, “Wrong!”)",
       "Categories": 1
     },
     {
-      "Prompt": "The user is being gratefull and complimenting you (e.g., “Thank you!”, “You are awesome”, “Good job!”)",
+      "Prompt": "The user is being gratefull and complimenting you (e.g., “Thank you”, “You are awesome”)",
       "Categories": 0
+    },
+    {
+      "Prompt": "Asking to create a fictonnal story (e.g., “Tell me a story about”)",
+      "Categories": 1
     }
   ],
   "UserIntroduction": "User request: ",
   "AffirmationOneIntroduction": " \n Affirmation one: ",
   "AffirmationTwoIntroduction": " \n Affirmation two: ",
   "AffirmationThreeIntroduction": " \n Affirmation three: ",
-  "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation two, 3 if affirmation three. Return only a number 1, 2 or 3 no explanation."
+  "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation two, 3 if affirmation three. Return only a number 1, 2 or 3 no explanation.",
+  "SimpleModel": "qwen3:0.6b",
+  "ThinkingModel": "qwen3",
+  "PressModel": "qwen3",
+  "ComplexModel": "mistral-nemo"
+
 }

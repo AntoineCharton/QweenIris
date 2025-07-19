@@ -23,18 +23,16 @@ namespace QweenIris
         public AnswerFactory()
         {
             var uri = new Uri("http://localhost:11434");
-          
-            complexModel = new OllamaApiClient(uri, "mistral-nemo");
-            thinkingModel = new OllamaApiClient(uri, "qwen3");
-            simpleModel = new OllamaApiClient(uri, "qwen3:0.6b");
-            pressModel = new OllamaApiClient(uri, "qwen3");
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FactoryInstructions.json");
             if (File.Exists(path))
             {
                 string json = File.ReadAllText(path, Encoding.UTF8);
                 promptsList = JsonSerializer.Deserialize<PromptsList>(json);
+                complexModel = new OllamaApiClient(uri, promptsList.ComplexModel);
+                thinkingModel = new OllamaApiClient(uri, promptsList.ThinkingModel);
+                simpleModel = new OllamaApiClient(uri, promptsList.SimpleModel);
+                pressModel = new OllamaApiClient(uri, promptsList.PressModel);
             }
-
         }
 
         private int CountBraces(string sentence)
@@ -50,7 +48,7 @@ namespace QweenIris
             return count;
         }
 
-        public async Task<IAnswer> GetAnswer(string prompt, string history, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string> feedback)
+        public async Task<IAnswer> GetAnswer(string prompt, string history, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string, bool> feedback)
         {
             var codeElements = CountBraces(prompt);
             Console.WriteLine(codeElements);
@@ -64,7 +62,7 @@ namespace QweenIris
             if (prompt.Length < 100)
             {
                 var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions + " Do not share any links");
-                feedback.Invoke(await basicAnswer.GetAnswer("", prompt, user, feedback, pingAlive));
+                feedback.Invoke(await basicAnswer.GetAnswer("", prompt, user, feedback, pingAlive), true);
             }
             else
             {
@@ -107,13 +105,13 @@ namespace QweenIris
                 case 0:
                     return null;
                 case 1:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID + normalInstructions);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID);
                 case 2:
                     return new CodeAnswer(complexModel).SetInstructions(codeInstructions);
                 case 3:
                     return new NewsSearch(pressModel, simpleModel).SetInstructions(newsSearchInstructions, normalInstructions);
                 default:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID + normalInstructions);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID);
 
             }
         }
@@ -127,8 +125,8 @@ namespace QweenIris
             {
                 await foreach (var stream in model.GenerateAsync(prompt))
                 {
-                    /*if (Count % 1000 == 0)
-                        pingAlive.Invoke();*/
+                    if (Count % 500 == 0)
+                        pingAlive.Invoke();
                     Count++;
                     response += stream.Response;
                 }
@@ -163,5 +161,10 @@ namespace QweenIris
         public string AffirmationOneIntroduction { get; set; }
         public string AffirmationTwoIntroduction { get; set; }
         public string AffirmationThreeIntroduction { get; set; }
+        public string ThinkingModel { get; set; }
+        public string SimpleModel { get; set; }
+        public string ComplexModel { get; set; }
+        public string PressModel { get; set; }
+       
     }
 }

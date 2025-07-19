@@ -59,9 +59,9 @@ namespace QweenIris
             await discordBot.TriggerTyping();
         }
 
-        private async void sendMessage(string message)
+        private async void sendMessage(string message, bool deletePrevious)
         {
-            await discordBot.ReplyAsync(message);
+            await discordBot.ReplyAsync(message, deletePrevious);
         }
 
         private async void ReadMessage(string characterID, string instructions, string codeInstructions, string newsSearchInstructions, string history, string message, string user)
@@ -74,7 +74,7 @@ namespace QweenIris
                 var answer = await answerProvider.GetAnswer(history, message, user, sendMessage, TriggerTyping);
                 readMessageCount++;
                 Console.WriteLine(" " + answer);
-                await discordBot.ReplyAsync(answer);
+                await discordBot.ReplyAsync(answer, false);
                 if (readMessageCount > 30)
                 {
                     readMessageCount = 0;

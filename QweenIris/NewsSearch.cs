@@ -72,7 +72,7 @@ namespace QweenIris
             }
         }
 
-        public async Task<string> GetRelevantArticle(string feed, string message, Action pingAlive, Action<string> feedback)
+        public async Task<string> GetRelevantArticle(string feed, string message, Action pingAlive, Action<string, bool> feedback)
         {
             var article = new RSS2Parser();
             try
@@ -114,7 +114,7 @@ namespace QweenIris
             return "";
         }
 
-        public async Task PushWaitingAnswer(Action<string> feedback, string prompt)
+        public async Task PushWaitingAnswer(Action<string, bool> feedback, string prompt)
         {
             var waitingResponse = "";
             await foreach (var stream in normalModel.GenerateAsync(prompt))
@@ -122,10 +122,10 @@ namespace QweenIris
                 waitingResponse += stream.Response;
             }
             waitingResponse = Regex.Replace(waitingResponse, @"<think>[\s\S]*?</think>", "");
-            feedback.Invoke(waitingResponse);
+            feedback.Invoke(waitingResponse, true);
         }
 
-        public async Task<string> GenerateMatchingTags(Action<string> feedback, string prompt)
+        public async Task<string> GenerateMatchingTags(Action<string, bool> feedback, string prompt)
         {
             HashSet<string> uniqueCategories = new HashSet<string>();
 
@@ -158,7 +158,7 @@ namespace QweenIris
             return pickedCategory;
         }
 
-        public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
             List<string> categoriesToMatch = new List<string> {};

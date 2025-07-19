@@ -27,7 +27,7 @@
     },
     {
       "name": "NPR News",
-      "categories": [ "Any"],
+      "categories": [ "Any" ],
       "rss": "https://feeds.npr.org/1001/rss.xml"
     },
     {
@@ -37,12 +37,12 @@
     },
     {
       "name": "Le Monde (English)",
-      "categories": [ "Politics", "Culture", "Europe", "World"],
+      "categories": [ "Politics", "Culture", "Europe", "World" ],
       "rss": "https://www.lemonde.fr/en/rss/une.xml"
     },
     {
       "name": "The Verge",
-      "categories": [ "Technology", "Gaming", "Culture"],
+      "categories": [ "Technology", "Gaming", "Culture" ],
       "rss": "https://www.theverge.com/rss/index.xml"
     },
     {
@@ -56,8 +56,13 @@
       "rss": "https://www.cheapshark.com/api/1.0/deals?storeID=1&output=rss"
     },
     {
+      "name": "Steam releases",
+      "categories": [ "Gaming", "Entertainment", "Promotions" ],
+      "rss": "https://kotaku.com/tag/steam/rss"
+    },
+    {
       "name": "La presse",
-      "categories": [ "America", "Culture", "Politics"],
+      "categories": [ "America", "Culture", "Politics" ],
       "rss": "https://www.lapresse.ca/actualites/rss"
     },
     {

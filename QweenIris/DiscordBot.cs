@@ -1,5 +1,7 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
+using OllamaSharp.Models.Chat;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
@@ -10,11 +12,13 @@ namespace QweenIris
         private readonly DiscordSocketClient client;
         private readonly string token;
         private readonly ulong chatChannelID;
+        List<RestUserMessage> messagesToDeleteIfOverriden;
 
         public DiscordBot(Action<string, string, string, string, string, string, string> action, ulong characterID, ulong instructionsID, ulong codeInstructionsID, ulong newsInstructionID, ulong channelID)
         {
             chatChannelID = channelID;
             this.client = new DiscordSocketClient();
+            messagesToDeleteIfOverriden = new List<RestUserMessage>();
             var config = Config.Load();
             token = config["Discord:Token"];
             this.client.MessageReceived += async message =>
@@ -26,7 +30,7 @@ namespace QweenIris
                     {
                         if (message.Channel.Id != channelID || message.Author.IsBot)
                             return;
-
+                        messagesToDeleteIfOverriden.Clear();
                         Console.WriteLine("New message received:");
                         var instructionsChannel = client.GetChannel(instructionsID) as SocketTextChannel;
                         var instruction = "";
@@ -63,7 +67,7 @@ namespace QweenIris
 
                         var channel = client.GetChannel(channelID) as SocketTextChannel;
                         var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        var history = await channel.GetMessagesAsync(limit: 50).FlattenAsync();
+                        var history = await channel.GetMessagesAsync(limit: 10).FlattenAsync();
                         var parsedHistory = "";
 
                         var currentPastMessageLooked = 0;
@@ -92,9 +96,28 @@ namespace QweenIris
             };
         }
 
-        public async Task ReplyAsync(string response)
+        public async Task DeleteLastOverrideBotMessage()
+        {
+            await Task.Delay(500); // Waits for 1 second (1000 milliseconds)
+            foreach (var overrideMessage in messagesToDeleteIfOverriden)
+            {
+                var channel = client.GetChannel(overrideMessage.Channel.Id) as SocketTextChannel;
+                var message = await channel.GetMessageAsync(overrideMessage.Id);
+                await message.DeleteAsync();
+            }
+            messagesToDeleteIfOverriden.Clear();
+
+
+        }
+
+        public async Task ReplyAsync(string response, bool deleteIfOveridden, bool isStackedMessage = false)
         {
             var message = client.GetChannel(chatChannelID) as SocketTextChannel;
+            if(!isStackedMessage)
+            {
+                await DeleteLastOverrideBotMessage();
+            }
+
             if (response.Length > 2000)
             {
                 string[] splitBlocks = response.Split(new string[] { "--BLOCK--" }, StringSplitOptions.RemoveEmptyEntries);
@@ -107,14 +130,18 @@ namespace QweenIris
                     }
                     foreach (var line in lines)
                     {
-                        await ReplyAsync(line);
+                        await ReplyAsync(line, deleteIfOveridden, true);
                     }
                 }
             }
             else if (!string.IsNullOrWhiteSpace(response) && response.Length > 0)
             {
                 response = response.Replace("--BLOCK--", "");
-                await message.SendMessageAsync(response);
+                var messageOnServer = await message.SendMessageAsync(response);
+                if (deleteIfOveridden)
+                {
+                    messagesToDeleteIfOverriden.Add(messageOnServer);
+                }
             }
 
         }
@@ -127,7 +154,6 @@ namespace QweenIris
         }
         public async Task StartAsync()
         {
-
             this.client.Log += LogFuncAsync;
 
             await this.client.LoginAsync(TokenType.Bot, token);

@@ -19,14 +19,14 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
             var response = "";
-            var formatedInstructions = $"Your instructions are: '{instructionsToFollow}'";
-            user = $"The user name is: '{user}'";
-            message = $"This is the message: '{message}'";
+            var formatedInstructions = "Instructions:" + "{\n" + instructionsToFollow + "\n}";
+            user = "User:" + "{\n" +user + "}";
+            message = "Message:" + "{\n" + message + "\n}";
             pingAlive.Invoke();
-            await foreach (var stream in ollama.GenerateAsync(formatedInstructions + user + message))
+            await foreach (var stream in ollama.GenerateAsync(user + message + formatedInstructions))
             {
                 response += stream.Response;
             }
@@ -38,6 +38,6 @@ namespace QweenIris
 
     interface IAnswer
     {
-        public Task<string> GetAnswer(string history, string message, string user, Action<string> feedback, Action pingAlive);
+        public Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive);
     }
 }
