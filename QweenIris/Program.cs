@@ -1,11 +1,6 @@
-﻿using Discord;
-using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
-using OllamaSharp;
+﻿using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace QweenIris
 {

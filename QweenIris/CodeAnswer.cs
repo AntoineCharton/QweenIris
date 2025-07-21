@@ -35,7 +35,7 @@ namespace QweenIris
             feedback.Invoke("Let me think about it", true);
             pingAlive.Invoke();
             var count = 0;
-            await foreach (var stream in ollama.GenerateAsync(formatedInstructions + history + user + message))
+            await foreach (var stream in ollama.GenerateAsync(formatedInstructions + user + message))
             {
                 if(count % 100 == 0)
                 {

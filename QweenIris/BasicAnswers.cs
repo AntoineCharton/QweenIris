@@ -21,12 +21,14 @@ namespace QweenIris
 
         public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
-            var response = "";
-            var formatedInstructions = "Instructions:" + "{\n" + instructionsToFollow + "\n}";
-            user = "User:" + "{\n" +user + "}";
-            message = "Message:" + "{\n" + message + "\n}";
+            var promptFormat = new MessageContainer();
+            promptFormat.SetInstructions(instructionsToFollow);
+            user = "Name:" + user;
+            promptFormat.SetContext(history);
+            promptFormat.SetUserPrompt(message);
             pingAlive.Invoke();
-            await foreach (var stream in ollama.GenerateAsync(user + message + formatedInstructions))
+            var response = "";
+            await foreach (var stream in OllamaFormater.GenerateResponse(ollama, promptFormat))
             {
                 response += stream.Response;
             }

@@ -1,4 +1,7 @@
-﻿using OllamaSharp;
+﻿using Discord;
+using OllamaSharp;
+using OllamaSharp.Models;
+using OllamaSharp.Models.Chat;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -54,8 +57,8 @@ namespace QweenIris
             var searchModel = simpleModel;
             if (prompt.Length < 100)
             {
-                var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions + " Do not share any links");
-                feedback.Invoke(await basicAnswer.GetAnswer("", prompt, user, feedback, pingAlive), true);
+                var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
+                feedback.Invoke(await basicAnswer.GetAnswer(history, prompt, user, feedback, pingAlive), true);
             }
             else
             {
@@ -69,13 +72,19 @@ namespace QweenIris
                 if (i + 1 >= promptsList.Prompts.Count)
                     nextStep = i;
                 var affirmationThree = promptsList.Prompts[nextStep].Prompt;
+
                 var formatedPrompt = promptsList.UserIntroduction + prompt +
                     promptsList.AffirmationOneIntroduction + affirmationOne +
                     promptsList.AffirmationTwoIntroduction + affirmationTwo +
-                    promptsList.AffirmationThreeIntroduction + affirmationThree +
-                    promptsList.ParsePromptInstructions;
+                    promptsList.AffirmationThreeIntroduction + affirmationThree;
 
-                var targetAnswer = await GetAppropriateAnswer(formatedPrompt, history, searchModel, pingAlive);
+                var promptFormat = new MessageContainer();
+                promptFormat.SetContext("History:" + history);
+                promptFormat.SetUserPrompt(formatedPrompt);
+                promptFormat.SetInstructions(promptsList.ParsePromptInstructions);
+                
+
+                var targetAnswer = await GetAppropriateAnswer(promptFormat, history, searchModel, pingAlive);
                 if (targetAnswer == 2)
                 {
                     mostProbableInformation = i;
@@ -85,9 +94,16 @@ namespace QweenIris
                 }
             }
 
-            targetModel = promptsList.Prompts[mostProbableInformation].Categories;
+            if(promptsList.Prompts.Count > mostProbableInformation)
+                targetModel = promptsList.Prompts[mostProbableInformation].Categories;
 
-            Console.WriteLine("Selected new prompt: " + promptsList.Prompts[mostProbableInformation].Prompt);
+            try
+            {
+                Console.WriteLine("Selected new prompt: " + promptsList.Prompts[mostProbableInformation].Prompt);
+            } catch
+            {
+                Console.WriteLine("Oops");
+            }
             return GetCodedAnswer(targetModel, prompt, characterID, normalInstructions, codeInstructions, newsSearchInstructions);
         }
 
@@ -109,14 +125,15 @@ namespace QweenIris
             }
         }
 
-        public async Task<int> GetAppropriateAnswer(string prompt, string history, OllamaApiClient model, Action pingAlive)
+        public async Task<int> GetAppropriateAnswer(MessageContainer prompt, string history, OllamaApiClient model, Action pingAlive)
         {
             var instruction = promptsList;
             var response = "";
             var Count = 0;
             try
             {
-                await foreach (var stream in model.GenerateAsync(prompt))
+
+                await foreach (var stream in OllamaFormater.GenerateResponse(model, prompt))
                 {
                     if (Count % 500 == 0)
                         pingAlive.Invoke();
@@ -159,5 +176,86 @@ namespace QweenIris
         public string ComplexModel { get; set; }
         public string PressModel { get; set; }
        
+    }
+
+    public class Message
+    {
+        public string Role { get; set; }
+        public string Content { get; set; }
+
+        private string context;
+        private string prompt;
+
+        public Message(string role) 
+        { 
+            Role = role;
+        }
+
+        public void SetInstructions(string instructions)
+        {
+            Content = instructions;
+        }
+
+        public void SetContext(string newContext)
+        {
+            context = newContext;
+            FormatContext();
+        }
+
+        public void SetPrompt(string newPrompt)
+        {
+            prompt = newPrompt;
+            FormatContext();
+        }
+
+        void FormatContext()
+        {
+            Content = "Context:\n" + context + "\n\n---\n\n" + "Question:\n" + prompt;
+        }
+    }
+
+    public static class OllamaFormater
+    {
+        public static async IAsyncEnumerable<GenerateResponseStream?> GenerateResponse(OllamaApiClient ollama, MessageContainer message)
+        {
+            var prompt = message.GetJsonString();
+            await foreach (var item in ollama.GenerateAsync(prompt))
+            {
+                yield return item;
+            }
+        }
+    }
+
+    public class MessageContainer
+    {
+        public List<Message> Messages { get; set; }
+
+        public MessageContainer() {
+            Messages = new List<Message>();
+            Messages.Add(new Message("System"));
+            Messages.Add(new Message("User"));
+        }
+
+        public void SetInstructions(string instruction)
+        {
+            Messages[0].SetInstructions(instruction);
+        }
+
+        public void SetContext(string context)
+        {
+            Messages[1].SetContext(context);
+        }
+
+        public void SetUserPrompt(string prompt)
+        {
+            Messages[1].SetPrompt(prompt);
+        }
+
+        public string GetJsonString()
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonIndented = JsonSerializer.Serialize(this, options);
+            return jsonIndented;
+        }
     }
 }

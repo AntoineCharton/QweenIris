@@ -49,6 +49,5 @@
   "SimpleModel": "qwen3:0.6b",
   "ThinkingModel": "qwen3",
   "PressModel": "qwen3",
-  "ComplexModel": "mistral-nemo"
-
+  "ComplexModel": "qwen3"
 }
