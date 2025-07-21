@@ -44,7 +44,7 @@ namespace QweenIris
             return count;
         }
 
-        public async Task<IAnswer> GetAnswer(string prompt, string history, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string, bool> feedback)
+        public async Task<IAnswer> GetAnswer(string prompt, string history, string shortHistory, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string, bool> feedback)
         {
             var codeElements = CountBraces(prompt);
             Console.WriteLine(codeElements);
@@ -58,7 +58,7 @@ namespace QweenIris
             if (prompt.Length < 100)
             {
                 var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
-                feedback.Invoke(await basicAnswer.GetAnswer(history, prompt, user, feedback, pingAlive), true);
+                feedback.Invoke(await basicAnswer.GetAnswer(history, shortHistory, prompt, user, feedback, pingAlive), true);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace QweenIris
                     promptsList.AffirmationThreeIntroduction + affirmationThree;
 
                 var promptFormat = new MessageContainer();
-                promptFormat.SetContext("History:" + history);
+                promptFormat.SetContext("History:" + shortHistory);
                 promptFormat.SetUserPrompt(formatedPrompt);
                 promptFormat.SetInstructions(promptsList.ParsePromptInstructions);
                 

@@ -20,7 +20,7 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
             var promptFormat = new MessageContainer();
             promptFormat.SetContext("History:" + history + " this is the user talking: " + user );

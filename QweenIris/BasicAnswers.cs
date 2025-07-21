@@ -19,12 +19,12 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
             var promptFormat = new MessageContainer();
             promptFormat.SetInstructions(instructionsToFollow);
             user = "Name:" + user;
-            promptFormat.SetContext(history);
+            promptFormat.SetContext(shortHistory);
             promptFormat.SetUserPrompt(message);
             pingAlive.Invoke();
             var response = "";
@@ -40,6 +40,6 @@ namespace QweenIris
 
     interface IAnswer
     {
-        public Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive);
+        public Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive);
     }
 }

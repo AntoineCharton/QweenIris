@@ -23,13 +23,6 @@ namespace QweenIris
 
         private static void DisableQuickEditMode()
         {
-            // Disable QuickEdit Mode
-            // Quick Edit mode freezes the app to let users select text.
-            // We don't want that. We want the app to run smoothly in the background.
-            // - https://stackoverflow.com/q/4453692
-            // - https://stackoverflow.com/a/4453779
-            // - https://stackoverflow.com/a/30517482
-
             IntPtr handle = Process.GetCurrentProcess().MainWindowHandle;
             SetConsoleMode(handle, ENABLE_EXTENDED_FLAGS);
         }
@@ -38,7 +31,7 @@ namespace QweenIris
         {
             DisableQuickEditMode();
             Ollama.RestartOllama();
-            discordBot = new DiscordBot(ReadMessage, 1395806358208643184, 1392616212621557871, 1394400815191425045, 1394684362959884411, 1392593573551013958);
+            discordBot = new DiscordBot(ReadMessage);
             webFetcher = new WebFetcher();
             answerFactory = new AnswerFactory();
         }
@@ -59,14 +52,14 @@ namespace QweenIris
             await discordBot.ReplyAsync(message, deletePrevious);
         }
 
-        private async void ReadMessage(string characterID, string instructions, string codeInstructions, string newsSearchInstructions, string history, string message, string user)
+        private async void ReadMessage(string characterID, string instructions, string codeInstructions, string newsSearchInstructions, string history, string shortHistory, string message, string user)
         {
             Console.WriteLine(" " +message);
             TriggerTyping();
-            var answerProvider = await answerFactory.GetAnswer(message, history, characterID, instructions, codeInstructions, newsSearchInstructions, user, TriggerTyping, sendMessage);
+            var answerProvider = await answerFactory.GetAnswer(message, history, shortHistory, characterID, instructions, codeInstructions, newsSearchInstructions, user, TriggerTyping, sendMessage);
             if (answerProvider != null)
             {
-                var answer = await answerProvider.GetAnswer(history, message, user, sendMessage, TriggerTyping);
+                var answer = await answerProvider.GetAnswer(history, shortHistory, message, user, sendMessage, TriggerTyping);
                 readMessageCount++;
                 Console.WriteLine(" " + answer);
                 await discordBot.ReplyAsync(answer, false);

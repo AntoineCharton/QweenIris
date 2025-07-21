@@ -1,12 +1,28 @@
 ﻿using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using OllamaSharp.Models.Chat;
-using System.Text.RegularExpressions;
-using System.Threading.Channels;
+using Microsoft.Extensions.Configuration;
 
 namespace QweenIris
 {
+    internal class Channels
+    {
+        public Channels(IConfigurationRoot config)
+        {
+            CharacterCardChannelID = config["Discord:CharacterCardChannelID"] == null ? 0UL : ulong.Parse(config["Discord:CharacterCardChannelID"]);
+            InstructionsChannelID = config["Discord:InstructionsChannelID"] == null ? 0UL : ulong.Parse(config["Discord:InstructionsChannelID"]);
+            CodeInstructionsChannelID = config["Discord:CodeInstructionsChannelID"] == null ? 0UL : ulong.Parse(config["Discord:CodeInstructionsChannelID"]);
+            NewsInstructionsChannelID = config["Discord:NewsInstructionsChannelID"] == null ? 0UL : ulong.Parse(config["Discord:NewsInstructionsChannelID"]);
+            WatchedChannelID = config["Discord:WatchedChannelID"] == null ? 0UL : ulong.Parse(config["Discord:WatchedChannelID"]);
+        }
+
+        internal ulong CharacterCardChannelID;
+        internal ulong InstructionsChannelID;
+        internal ulong CodeInstructionsChannelID;
+        internal ulong NewsInstructionsChannelID;
+        internal ulong WatchedChannelID;
+    }
+
     internal class DiscordBot
     {
         private readonly DiscordSocketClient client;
@@ -14,13 +30,14 @@ namespace QweenIris
         private readonly ulong chatChannelID;
         List<RestUserMessage> messagesToDeleteIfOverriden;
 
-        public DiscordBot(Action<string, string, string, string, string, string, string> action, ulong characterID, ulong instructionsID, ulong codeInstructionsID, ulong newsInstructionID, ulong channelID)
+        public DiscordBot(Action<string, string, string, string, string, string, string, string> action)
         {
-            chatChannelID = channelID;
             this.client = new DiscordSocketClient();
             messagesToDeleteIfOverriden = new List<RestUserMessage>();
             var config = Config.Load();
             token = config["Discord:Token"];
+            var instructionChannels = new Channels(config);
+            chatChannelID = instructionChannels.WatchedChannelID;
             this.client.MessageReceived += async message =>
             {
                 // Avoid blocking the gateway task
@@ -28,11 +45,11 @@ namespace QweenIris
                 {
                     try
                     {
-                        if (message.Channel.Id != channelID || message.Author.IsBot)
+                        if (message.Channel.Id != instructionChannels.WatchedChannelID || message.Author.IsBot)
                             return;
                         messagesToDeleteIfOverriden.Clear();
                         Console.WriteLine("New message received:");
-                        var instructionsChannel = client.GetChannel(instructionsID) as SocketTextChannel;
+                        var instructionsChannel = client.GetChannel(instructionChannels.InstructionsChannelID) as SocketTextChannel;
                         var instruction = "";
                         var instructionChannelMessages = await instructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
                         foreach (var instructionMessage in instructionChannelMessages)
@@ -40,7 +57,7 @@ namespace QweenIris
                             instruction += " " + instructionMessage.Content;
                         }
 
-                        var characterChannel = client.GetChannel(characterID) as SocketTextChannel;
+                        var characterChannel = client.GetChannel(instructionChannels.CharacterCardChannelID) as SocketTextChannel;
                         var characterInstruction = "";
                         var characterChannelMessages = await characterChannel.GetMessagesAsync(limit: 1).FlattenAsync();
                         foreach (var instructionMessage in characterChannelMessages)
@@ -48,7 +65,7 @@ namespace QweenIris
                             characterInstruction += " " + instructionMessage.Content;
                         }
 
-                        var codeInstructionsChannel = client.GetChannel(codeInstructionsID) as SocketTextChannel;
+                        var codeInstructionsChannel = client.GetChannel(instructionChannels.CodeInstructionsChannelID) as SocketTextChannel;
                         var codeInstruction = "";
                         var codeInstructionChannelMessages = await codeInstructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
                         foreach (var instructionMessage in codeInstructionChannelMessages)
@@ -56,7 +73,7 @@ namespace QweenIris
                             codeInstruction += " " + instructionMessage.Content;
                         }
 
-                        var newsInstructionChannel = client.GetChannel(newsInstructionID) as SocketTextChannel;
+                        var newsInstructionChannel = client.GetChannel(instructionChannels.NewsInstructionsChannelID) as SocketTextChannel;
                         var newsInstruction = "";
                         var newsInstructionChannelMessages = await newsInstructionChannel.GetMessagesAsync(limit: 1).FlattenAsync();
                         foreach (var instructionMessage in newsInstructionChannelMessages)
@@ -65,25 +82,38 @@ namespace QweenIris
                         }
 
 
-                        var channel = client.GetChannel(channelID) as SocketTextChannel;
+                        var channel = client.GetChannel(instructionChannels.WatchedChannelID) as SocketTextChannel;
                         var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        var history = await channel.GetMessagesAsync(limit: 10).FlattenAsync();
+                        var history = await channel.GetMessagesAsync(limit: 30).FlattenAsync();
                         var parsedHistory = "";
 
                         var currentPastMessageLooked = 0;
                         foreach (var pastMessage in history)
                         {
-                            if (currentPastMessageLooked > 0 && !pastMessage.Author.IsBot)
+                            if (currentPastMessageLooked > 0 && pastMessage.Author.IsBot)
                             {
                                 parsedHistory += $"from: {pastMessage.Author} Message:{pastMessage.Content}\n";
                             }
                             currentPastMessageLooked++;
                         }
 
+                        var shortHistory = await channel.GetMessagesAsync(limit: 5).FlattenAsync();
+                        var shortParsedHistory = "";
+
+                        var shortCurrentPastMessageLooked = 0;
+                        foreach (var pastMessage in shortHistory)
+                        {
+                            if (currentPastMessageLooked > 0 && pastMessage.Author.IsBot)
+                            {
+                                parsedHistory += $"from: {pastMessage.Author} Message:{pastMessage.Content}\n";
+                            }
+                            shortCurrentPastMessageLooked++;
+                        }
+
                         var messageLooked = 0;
                         foreach (var message in messages)
                         {
-                            action.Invoke(characterInstruction, instruction, codeInstruction, newsInstruction, parsedHistory, message.Content, message.Author.Username);
+                            action.Invoke(characterInstruction, instruction, codeInstruction, newsInstruction, parsedHistory, shortParsedHistory, message.Content, message.Author.Username);
                         }
 
 
@@ -99,11 +129,18 @@ namespace QweenIris
         public async Task DeleteLastOverrideBotMessage()
         {
             await Task.Delay(500); // Waits for 1 second (1000 milliseconds)
-            foreach (var overrideMessage in messagesToDeleteIfOverriden)
+
+            try
             {
-                var channel = client.GetChannel(overrideMessage.Channel.Id) as SocketTextChannel;
-                var message = await channel.GetMessageAsync(overrideMessage.Id);
-                await message.DeleteAsync();
+                foreach (var overrideMessage in messagesToDeleteIfOverriden)
+                {
+                    var channel = client.GetChannel(overrideMessage.Channel.Id) as SocketTextChannel;
+                    var message = await channel.GetMessageAsync(overrideMessage.Id);
+                    await message.DeleteAsync();
+                }
+            } catch
+            {
+                ReplyAsync("Ooops couldn't delete messages", false);
             }
             messagesToDeleteIfOverriden.Clear();
 

@@ -69,6 +69,16 @@
       "name": "science daily",
       "categories": [ "Science", "Culture", "Technology" ],
       "rss": "https://www.sciencedaily.com/rss/top.xml"
+    },
+    {
+      "name": "South china morning post",
+      "categories": [ "Asia", "World" ],
+      "rss": "https://www.scmp.com/rss/91/feed/"
+    },
+    {
+      "name": "Africa news",
+      "categories": [ "Africa", "World" ],
+      "rss": "https://www.africanews.com/feed/rss?themes=news"
     }
   ]
 }

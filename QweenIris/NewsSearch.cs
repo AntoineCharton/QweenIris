@@ -158,7 +158,7 @@ namespace QweenIris
             return pickedCategory;
         }
 
-        public async Task<string> GetAnswer(string history, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
             List<string> categoriesToMatch = new List<string> {};
