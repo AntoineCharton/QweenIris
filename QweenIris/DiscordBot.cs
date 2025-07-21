@@ -157,7 +157,7 @@ namespace QweenIris
 
             if (response.Length > 2000)
             {
-                string[] splitBlocks = response.Split(new string[] { "--BLOCK--" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] splitBlocks = response.Split(new string[] { "---" }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var block in splitBlocks)
                 {
                     string [] lines = { block };
@@ -173,7 +173,7 @@ namespace QweenIris
             }
             else if (!string.IsNullOrWhiteSpace(response) && response.Length > 0)
             {
-                response = response.Replace("--BLOCK--", "");
+                response = response.Replace("---", "");
                 var messageOnServer = await message.SendMessageAsync(response);
                 if (deleteIfOveridden)
                 {
