@@ -28,9 +28,17 @@ namespace QweenIris
             promptFormat.SetUserPrompt(message);
             pingAlive.Invoke();
             var response = "";
-            await foreach (var stream in OllamaFormater.GenerateResponse(ollama, promptFormat))
+            try
             {
-                response += stream.Response;
+                await foreach (var stream in OllamaFormater.GenerateResponse(ollama, promptFormat))
+                {
+                    response += stream.Response;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return await GetAnswer(history, shortHistory, message, user, feedback, pingAlive);
             }
             Console.WriteLine(response);
             string output = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");

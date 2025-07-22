@@ -25,6 +25,10 @@
       "Categories": 0
     },
     {
+      "Prompt": "Casual conversation (e.g., “what's up?”, “how are you”, “let's talk'”)",
+      "Categories": 1
+    },
+    {
       "Prompt": "User is refering to a past conversation (e.g., “What do you mean?”,  “What did we talk about?”)",
       "Categories": 1
     },

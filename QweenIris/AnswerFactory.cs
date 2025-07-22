@@ -58,7 +58,7 @@ namespace QweenIris
             if (prompt.Length < 100)
             {
                 var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
-                feedback.Invoke(await basicAnswer.GetAnswer(history, shortHistory, prompt, user, feedback, pingAlive), true);
+                feedback.Invoke(await basicAnswer.GetAnswer("", "", prompt, user, feedback, pingAlive), true);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace QweenIris
                     promptsList.AffirmationThreeIntroduction + affirmationThree;
 
                 var promptFormat = new MessageContainer();
-                promptFormat.SetContext("History:" + shortHistory);
+                //promptFormat.SetContext("History:" + shortHistory);
                 promptFormat.SetUserPrompt(formatedPrompt);
                 promptFormat.SetInstructions(promptsList.ParsePromptInstructions);
                 

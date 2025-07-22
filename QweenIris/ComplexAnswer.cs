@@ -22,6 +22,7 @@ namespace QweenIris
 
         public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
         {
+            feedback.Invoke("Let me think one second", true);
             var promptFormat = new MessageContainer();
             promptFormat.SetContext("History:" + history + " this is the user talking: " + user );
             promptFormat.SetUserPrompt(message);

@@ -30,12 +30,26 @@ namespace QweenIris
         private readonly ulong chatChannelID;
         List<RestUserMessage> messagesToDeleteIfOverriden;
 
+        private async Task<string> GetLastMessagesOnChannel(ulong channelID, int depth = 1)
+        {
+            var channel = client.GetChannel(channelID) as SocketTextChannel;
+            var message = "";
+            var instructionChannelMessages = await channel.GetMessagesAsync(limit: depth).FlattenAsync();
+            foreach (var instructionMessage in instructionChannelMessages)
+            {
+                message += " " + instructionMessage.Content;
+            }
+
+            return message;
+        }
+
         public DiscordBot(Action<string, string, string, string, string, string, string, string> action)
         {
             this.client = new DiscordSocketClient();
             messagesToDeleteIfOverriden = new List<RestUserMessage>();
             var config = Config.Load();
             token = config["Discord:Token"];
+            var botTrigger = config["Discord:BotTrigger"];
             var instructionChannels = new Channels(config);
             chatChannelID = instructionChannels.WatchedChannelID;
             this.client.MessageReceived += async message =>
@@ -45,52 +59,27 @@ namespace QweenIris
                 {
                     try
                     {
-                        if (message.Channel.Id != instructionChannels.WatchedChannelID || message.Author.IsBot)
+                        var channel = client.GetChannel(message.Channel.Id) as SocketTextChannel;
+                        var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
+                        var isMentionningBot = false;
+                        if (message.Content.Contains(botTrigger))
+                            isMentionningBot = true;
+                        if ((message.Channel.Id != instructionChannels.WatchedChannelID || message.Author.IsBot))
                             return;
                         messagesToDeleteIfOverriden.Clear();
                         Console.WriteLine("New message received:");
-                        var instructionsChannel = client.GetChannel(instructionChannels.InstructionsChannelID) as SocketTextChannel;
-                        var instruction = "";
-                        var instructionChannelMessages = await instructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        foreach (var instructionMessage in instructionChannelMessages)
-                        {
-                            instruction += " " + instructionMessage.Content;
-                        }
+                        var instruction = await GetLastMessagesOnChannel(instructionChannels.InstructionsChannelID);
+                        var characterInstruction = await GetLastMessagesOnChannel(instructionChannels.CharacterCardChannelID);
+                        var codeInstruction = await GetLastMessagesOnChannel(instructionChannels.CodeInstructionsChannelID);
+                        var newsInstruction = await GetLastMessagesOnChannel(instructionChannels.NewsInstructionsChannelID);
 
-                        var characterChannel = client.GetChannel(instructionChannels.CharacterCardChannelID) as SocketTextChannel;
-                        var characterInstruction = "";
-                        var characterChannelMessages = await characterChannel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        foreach (var instructionMessage in characterChannelMessages)
-                        {
-                            characterInstruction += " " + instructionMessage.Content;
-                        }
-
-                        var codeInstructionsChannel = client.GetChannel(instructionChannels.CodeInstructionsChannelID) as SocketTextChannel;
-                        var codeInstruction = "";
-                        var codeInstructionChannelMessages = await codeInstructionsChannel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        foreach (var instructionMessage in codeInstructionChannelMessages)
-                        {
-                            codeInstruction += " " + instructionMessage.Content;
-                        }
-
-                        var newsInstructionChannel = client.GetChannel(instructionChannels.NewsInstructionsChannelID) as SocketTextChannel;
-                        var newsInstruction = "";
-                        var newsInstructionChannelMessages = await newsInstructionChannel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        foreach (var instructionMessage in newsInstructionChannelMessages)
-                        {
-                            newsInstruction += " " + instructionMessage.Content;
-                        }
-
-
-                        var channel = client.GetChannel(instructionChannels.WatchedChannelID) as SocketTextChannel;
-                        var messages = await channel.GetMessagesAsync(limit: 1).FlattenAsync();
-                        var history = await channel.GetMessagesAsync(limit: 30).FlattenAsync();
+                        var history = await channel.GetMessagesAsync(limit: 10).FlattenAsync();
                         var parsedHistory = "";
 
                         var currentPastMessageLooked = 0;
                         foreach (var pastMessage in history)
                         {
-                            if (currentPastMessageLooked > 0 && pastMessage.Author.IsBot)
+                            if (currentPastMessageLooked > 0)
                             {
                                 parsedHistory += $"from: {pastMessage.Author} Message:{pastMessage.Content}\n";
                             }
@@ -103,9 +92,9 @@ namespace QweenIris
                         var shortCurrentPastMessageLooked = 0;
                         foreach (var pastMessage in shortHistory)
                         {
-                            if (currentPastMessageLooked > 0 && pastMessage.Author.IsBot)
+                            if (currentPastMessageLooked > 0)
                             {
-                                parsedHistory += $"from: {pastMessage.Author} Message:{pastMessage.Content}\n";
+                                shortParsedHistory += $"from: {pastMessage.Author} Message:{pastMessage.Content}\n";
                             }
                             shortCurrentPastMessageLooked++;
                         }
