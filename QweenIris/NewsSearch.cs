@@ -1,6 +1,4 @@
 ﻿using OllamaSharp;
-using OllamaSharp.Models.Chat;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,7 +14,7 @@ namespace QweenIris
         private string newsInstructionsToFollow;
         private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
-        string waitingAnswerHistory;
+
         public NewsSearch(OllamaApiClient newsModel, OllamaApiClient normalModel)
         {
             webFetcher = new WebFetcher();
@@ -85,7 +83,7 @@ namespace QweenIris
                     newsArticles += article.Items[i].ToString() + "\n";
                 }
 
-                var instruction = "Pick one article here that would match the user request. If the request is vague, pick articles that are good news or cover light subjects. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
+                var instruction = mediaFeedList.SearchArticleInstructions;
                 var pickedArticle = "";
                 await foreach (var stream in normalModel.GenerateAsync(newsArticles + instruction + message))
                 {
@@ -97,7 +95,7 @@ namespace QweenIris
                 if (pickedArticleId != -1)
                 {
                     Console.WriteLine(article.Items[pickedArticleId].ToString());
-                    await PushWaitingAnswer(feedback, $"Instructions: Describe what you see. End your sentance by 'I am looking for an article for you.'. {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
+                    await PushWaitingAnswer(feedback, $"{mediaFeedList.WaitingAnswerInstructions} \n {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
                     return "\n" + article.Items[pickedArticleId].ToString();
                 }
             }
@@ -117,10 +115,7 @@ namespace QweenIris
                 waitingResponse += stream.Response;
             }
             waitingResponse = Regex.Replace(waitingResponse, @"<think>[\s\S]*?</think>", "");
-            var newHistory = waitingResponse;
-            waitingResponse = waitingAnswerHistory + "\n" + waitingResponse;
-            feedback.Invoke(waitingResponse, true);
-            waitingAnswerHistory += "\n" + newHistory; 
+            feedback.Invoke(waitingResponse, false);
         }
 
         public async Task<string> GenerateMatchingTags(Action<string, bool> feedback, string prompt)
@@ -145,7 +140,7 @@ namespace QweenIris
 
             var pickedCategory = "";
             Console.WriteLine(items);
-            var instructions = $"Which one of those categories matches the best the request: {items}, your instructions are to pick one that matches the user prompt best. Return only the category, no explanation. \n Request: {prompt}";
+            var instructions = $"{mediaFeedList.GenerateMatchingTagsIntro} {items}, {mediaFeedList.GenerateMatchingTagsInstructions} \n Request: {prompt}";
             await foreach (var stream in normalModel.GenerateAsync(instructions))
             {
                 pickedCategory += stream.Response;
@@ -164,7 +159,7 @@ namespace QweenIris
             categoriesToMatch.Add(pickedCategory);
             categoriesToMatch.Add("Any");
             KeepMatchedFeeds(mediaFeedList.MediaFeeds, categoriesToMatch.ToArray());
-            await PushWaitingAnswer(feedback, $"Instructions: Say you are going to search for what the user asked for. End your sentance by 'I am looking for an article.'. {normalInstructionsToFollow} \n prompt:{promptContext.Prompt}");
+            await PushWaitingAnswer(feedback, $"{mediaFeedList.AknowledgeSearchInstructions} {normalInstructionsToFollow} \n prompt:{promptContext.Prompt}");
             var relevantArticles = "";
             var numberOfArticles = 0;
            
@@ -187,7 +182,7 @@ namespace QweenIris
             if(numberOfArticles == 0)
             {
                 var nothingMessage = "";
-                await foreach (var stream in normalModel.GenerateAsync("User message: " + promptContext.Prompt + normalInstructionsToFollow + "Say you couldn't find anything. Do not include any link"))
+                await foreach (var stream in normalModel.GenerateAsync("User message: " + promptContext.Prompt + normalInstructionsToFollow + mediaFeedList.NoArticleFoundInstructions))
                 {
                     pingAlive.Invoke();
                     nothingMessage += stream.Response;
@@ -198,11 +193,11 @@ namespace QweenIris
 
             /// Not using standard formating. For some reason this works way better with fewer aluscinations.
             var response = "";
-            var date = $"This is the year {DateTime.Now.Year}";
-            var formatedInstruction = $"Your instructions are: '{newsInstructionsToFollow}'" + date;
-            var user = $"The user name is: '{promptContext.User}'";
-            var message = $"This is the message: '{promptContext.Prompt}'";
-            var history = $"This is the history of the conversation: '{promptContext.History}'";
+            var date = $"{mediaFeedList.dateIntroduction} {DateTime.Now.Year}";
+            var formatedInstruction = $"'{newsInstructionsToFollow}'" + date;
+            var user = $"{mediaFeedList.userIntroduction} '{promptContext.User}'";
+            var message = $"{mediaFeedList.messageIntroduction} '{promptContext.Prompt}'";
+            var history = $"{mediaFeedList.historyIntroduction} '{promptContext.History}'";
             pingAlive.Invoke();
             await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))
             {
@@ -244,5 +239,25 @@ namespace QweenIris
     {
         [JsonPropertyName("mediaFeeds")]
         public List<MediaFeeds> MediaFeeds { get; set; }
+        [JsonPropertyName("searchArticleInstructions")]
+        public string SearchArticleInstructions { get; set; }
+        [JsonPropertyName("waitingAnswerInstructions")]
+        public string WaitingAnswerInstructions { get; set; }
+        [JsonPropertyName("generateMatchingTagsIntro")]
+        public string GenerateMatchingTagsIntro { get; set; }
+        [JsonPropertyName("generateMatchingTagsInstructions")]
+        public string GenerateMatchingTagsInstructions { get; set; }
+        [JsonPropertyName("aknowledgeSearchInstructions")]
+        public string AknowledgeSearchInstructions { get; set; }
+        [JsonPropertyName("noArticleFoundInstructions")]
+        public string NoArticleFoundInstructions { get; set; }
+        [JsonPropertyName("dateIntroduction")]
+        public string dateIntroduction { get; set; }
+        [JsonPropertyName("userIntroduction")]
+        public string userIntroduction { get; set; }
+        [JsonPropertyName("messageIntroduction")]
+        public string messageIntroduction { get; set; }
+        [JsonPropertyName("historyIntroduction")]
+        public string historyIntroduction { get; set; }
     }
 }
