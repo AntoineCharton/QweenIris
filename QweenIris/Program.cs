@@ -52,14 +52,14 @@ namespace QweenIris
             await discordBot.ReplyAsync(message, deletePrevious);
         }
 
-        private async void ReadMessage(string characterID, string instructions, string codeInstructions, string newsSearchInstructions, string history, string shortHistory, string message, string user)
+        private async void ReadMessage(PromptContext promptContext)
         {
-            Console.WriteLine(" " +message);
+            Console.WriteLine(" " + promptContext.Prompt);
             TriggerTyping();
-            var answerProvider = await answerFactory.GetAnswer(message, history, shortHistory, characterID, instructions, codeInstructions, newsSearchInstructions, user, TriggerTyping, sendMessage);
+            var answerProvider = await answerFactory.GetAnswer(promptContext, TriggerTyping, sendMessage);
             if (answerProvider != null)
             {
-                var answer = await answerProvider.GetAnswer(history, shortHistory, message, user, sendMessage, TriggerTyping);
+                var answer = await answerProvider.GetAnswer(promptContext, sendMessage, TriggerTyping);
                 readMessageCount++;
                 Console.WriteLine(" " + answer);
                 await discordBot.ReplyAsync(answer, false);

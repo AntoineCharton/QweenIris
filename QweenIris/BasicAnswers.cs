@@ -19,13 +19,13 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(PromptContext promptContext, Action<string, bool> feedback, Action pingAlive)
         {
             var promptFormat = new MessageContainer();
             promptFormat.SetInstructions(instructionsToFollow);
-            user = "Name:" + user;
-            promptFormat.SetContext(shortHistory);
-            promptFormat.SetUserPrompt(message);
+            var user = "Name:" + promptContext.User;
+            promptFormat.SetContext(promptContext.ShortHistory);
+            promptFormat.SetUserPrompt(promptContext.Prompt);
             pingAlive.Invoke();
             var response = "";
             try
@@ -38,7 +38,7 @@ namespace QweenIris
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return await GetAnswer(history, shortHistory, message, user, feedback, pingAlive);
+                return await GetAnswer(promptContext, feedback, pingAlive);
             }
             Console.WriteLine(response);
             string output = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
@@ -48,6 +48,6 @@ namespace QweenIris
 
     interface IAnswer
     {
-        public Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive);
+        public Task<string> GetAnswer(PromptContext promptContext, Action<string, bool> feedback, Action pingAlive);
     }
 }

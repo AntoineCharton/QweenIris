@@ -20,12 +20,12 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(PromptContext promptContext, Action<string, bool> feedback, Action pingAlive)
         {
             feedback.Invoke("Let me think one second", true);
             var promptFormat = new MessageContainer();
-            promptFormat.SetContext("History:" + history + " this is the user talking: " + user );
-            promptFormat.SetUserPrompt(message);
+            promptFormat.SetContext("History:" + promptContext.History + " this is the user talking: " + promptContext.User);
+            promptFormat.SetUserPrompt(promptContext.Prompt);
             promptFormat.SetInstructions(instructionsToFollow);
     
             var response = "";

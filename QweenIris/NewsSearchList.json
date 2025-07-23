@@ -22,7 +22,7 @@
     },
     {
       "name": "Fox News",
-      "categories": [ "Any" ],
+      "categories": [ "America", "Politics", "World" ],
       "rss": "https://feeds.foxnews.com/foxnews/latest"
     },
     {
@@ -37,7 +37,7 @@
     },
     {
       "name": "Le Monde (English)",
-      "categories": [ "Politics", "Culture", "Europe", "World" ],
+      "categories": [ "Any" ],
       "rss": "https://www.lemonde.fr/en/rss/une.xml"
     },
     {
@@ -47,8 +47,13 @@
     },
     {
       "name": "IGN",
-      "categories": [ "Gaming", "Entertainment", "Technology" ],
+      "categories": [ "Any" ],
       "rss": "http://feeds.feedburner.com/ign/all"
+    },
+    {
+      "name": "PCGamer",
+      "categories": [ "Gaming", "Technology", "Culture" ],
+      "rss": "https://www.pcgamer.com/rss/"
     },
     {
       "name": "Steam promotions",
@@ -67,8 +72,23 @@
     },
     {
       "name": "science daily",
-      "categories": [ "Science", "Culture", "Technology" ],
+      "categories": [ "Any" ],
       "rss": "https://www.sciencedaily.com/rss/top.xml"
+    },
+    {
+      "name": "Nasa",
+      "categories": [ "Any" ],
+      "rss": "https://www.nasa.gov/feed/"
+    },
+    {
+      "name": "Nasa Tech",
+      "categories": [ "Technology", "Science" ],
+      "rss": "https://www.nasa.gov/feed/"
+    },
+    {
+      "name": "Esa",
+      "categories": [ "Any" ],
+      "rss": "https://www.esa.int/rssfeed/Our_Activities/Space_News"
     },
     {
       "name": "South china morning post",
@@ -79,6 +99,17 @@
       "name": "Africa news",
       "categories": [ "Africa", "World" ],
       "rss": "https://www.africanews.com/feed/rss?themes=news"
+    },
+    {
+      "name": "RT",
+      "categories": [ "Europe", "Asia" ],
+      "rss": "https://www.rt.com/rss/"
+    },
+    {
+      "name": "News au",
+      "categories": [ "World", "Oceania", "Asia" ],
+      "rss": "https://www.news.com.au/content-feeds/latest-news-world/"
     }
+
   ]
 }

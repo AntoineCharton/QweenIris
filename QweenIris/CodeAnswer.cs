@@ -25,15 +25,15 @@ namespace QweenIris
             return this;
         }
 
-        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(PromptContext promptContext, Action<string, bool> feedback, Action pingAlive)
         {
             var response = "";
             feedback.Invoke("Let me think about it", true);
             pingAlive.Invoke();
             MessageContainer messageContainer = new MessageContainer();
             messageContainer.SetInstructions(instructionsToFollow);
-            messageContainer.SetContext(history);
-            messageContainer.SetUserPrompt(message);
+            messageContainer.SetContext(promptContext.History);
+            messageContainer.SetUserPrompt(promptContext.Prompt);
             var count = 0;
             await foreach (var stream in OllamaFormater.GenerateResponse(ollama, messageContainer))
             {

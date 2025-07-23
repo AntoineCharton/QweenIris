@@ -16,7 +16,7 @@ namespace QweenIris
         private string newsInstructionsToFollow;
         private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
-
+        string waitingAnswerHistory;
         public NewsSearch(OllamaApiClient newsModel, OllamaApiClient normalModel)
         {
             webFetcher = new WebFetcher();
@@ -88,7 +88,7 @@ namespace QweenIris
                 var pickCount = 0;
                 var instruction = "Pick one article here that would match the user request. If the request is vague, pick articles that are good news or cover light subjects. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
                 var pickedArticle = "";
-                await foreach (var stream in newsModel.GenerateAsync(newsArticles + instruction + message))
+                await foreach (var stream in normalModel.GenerateAsync(newsArticles + instruction + message))
                 {
                     if (pickCount % 500 == 0)
                     {
@@ -122,7 +122,10 @@ namespace QweenIris
                 waitingResponse += stream.Response;
             }
             waitingResponse = Regex.Replace(waitingResponse, @"<think>[\s\S]*?</think>", "");
+            var newHistory = waitingResponse;
+            waitingResponse = waitingAnswerHistory + "\n" + waitingResponse;
             feedback.Invoke(waitingResponse, true);
+            waitingAnswerHistory += "\n" + newHistory; 
         }
 
         public async Task<string> GenerateMatchingTags(Action<string, bool> feedback, string prompt)
@@ -158,27 +161,28 @@ namespace QweenIris
             return pickedCategory;
         }
 
-        public async Task<string> GetAnswer(string history, string shortHistory, string message, string user, Action<string, bool> feedback, Action pingAlive)
+        public async Task<string> GetAnswer(PromptContext promptContext, Action<string, bool> feedback, Action pingAlive)
         {
             ShuffleList(mediaFeedList.MediaFeeds);
             List<string> categoriesToMatch = new List<string> {};
-            var pickedCategory = await GenerateMatchingTags(feedback, message);
+            var pickedCategory = await GenerateMatchingTags(feedback, promptContext.Prompt);
             categoriesToMatch.Add(pickedCategory);
             categoriesToMatch.Add("Any");
             KeepMatchedFeeds(mediaFeedList.MediaFeeds, categoriesToMatch.ToArray());
-            await PushWaitingAnswer(feedback, $"Instructions: End your sentance by 'I am looking for an article.'. {normalInstructionsToFollow} \n prompt:{message}");
+            await PushWaitingAnswer(feedback, $"Instructions: Say you are going to search for what the user asked for. End your sentance by 'I am looking for an article.'. {normalInstructionsToFollow} \n prompt:{promptContext.Prompt}");
             var relevantArticles = "";
             var numberOfArticles = 0;
+           
             foreach (var feed in mediaFeedList.MediaFeeds)
             {
-                var newArticle = await GetRelevantArticle(feed.Rss, message, pingAlive, feedback);
+                var newArticle = await GetRelevantArticle(feed.Rss, promptContext.Prompt, pingAlive, feedback);
                 relevantArticles += newArticle;
                 if(!string.IsNullOrWhiteSpace(newArticle))
                 {
                     numberOfArticles++;
                 }
 
-                if(numberOfArticles > 2)
+                if(numberOfArticles > 5)
                 {
                     break;
                 }
@@ -189,9 +193,9 @@ namespace QweenIris
             {
                 var nothingMessage = "";
                 var wordCount = 0;
-                await foreach (var stream in normalModel.GenerateAsync("User message: " + message + normalInstructionsToFollow + "Say you couldn't find anything. Do not include any link"))
+                await foreach (var stream in normalModel.GenerateAsync("User message: " + promptContext.Prompt + normalInstructionsToFollow + "Say you couldn't find anything. Do not include any link"))
                 {
-                    if (wordCount % 500 == 0)
+                    if (wordCount % 100 == 0)
                     {
                         pingAlive.Invoke();
                     }
@@ -202,12 +206,13 @@ namespace QweenIris
                 return nothingMessage;
             }
 
+            /// Not using standard formating. For some reason this works way better with fewer aluscinations.
             var response = "";
             var date = $"This is the year {DateTime.Now.Year}";
             var formatedInstruction = $"Your instructions are: '{newsInstructionsToFollow}'" + date;
-            user = $"The user name is: '{user}'";
-            message = $"This is the message: '{message}'";
-            history = $"This is the history of the conversation: '{history}'";
+            var user = $"The user name is: '{promptContext.User}'";
+            var message = $"This is the message: '{promptContext.Prompt}'";
+            var history = $"This is the history of the conversation: '{promptContext.History}'";
             pingAlive.Invoke();
             var count = 0;
             await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))

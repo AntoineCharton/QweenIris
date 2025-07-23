@@ -1,7 +1,6 @@
 ﻿using Discord;
 using OllamaSharp;
 using OllamaSharp.Models;
-using OllamaSharp.Models.Chat;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -44,26 +43,17 @@ namespace QweenIris
             return count;
         }
 
-        public async Task<IAnswer> GetAnswer(string prompt, string history, string shortHistory, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions, string user, Action pingAlive, Action<string, bool> feedback)
+        public async Task<IAnswer> GetAnswer(PromptContext promptContext, Action pingAlive, Action<string, bool> feedback)
         {
-            var codeElements = CountBraces(prompt);
+            var codeElements = CountBraces(promptContext.Prompt);
             Console.WriteLine(codeElements);
             if (codeElements > 4)
             {
-                return new CodeAnswer(complexModel).SetInstructions(codeInstructions);
+                return new CodeAnswer(complexModel).SetInstructions(promptContext.CodeInstructions);
             }    
             var targetModel = 0;
             var mostProbableInformation = 0;
             var searchModel = simpleModel;
-            if (prompt.Length < 100)
-            {
-                var basicAnswer = new BasicAnswers(simpleModel).SetInstructions(normalInstructions);
-                feedback.Invoke(await basicAnswer.GetAnswer("", "", prompt, user, feedback, pingAlive), true);
-            }
-            else
-            {
-                searchModel = simpleModel;
-            }
             for(var i = 1; i < promptsList.Prompts.Count; i += 2)
             {
                 var affirmationOne = promptsList.Prompts[mostProbableInformation].Prompt;
@@ -73,7 +63,7 @@ namespace QweenIris
                     nextStep = i;
                 var affirmationThree = promptsList.Prompts[nextStep].Prompt;
 
-                var formatedPrompt = promptsList.UserIntroduction + prompt +
+                var formatedPrompt = promptsList.UserIntroduction + promptContext.Prompt +
                     promptsList.AffirmationOneIntroduction + affirmationOne +
                     promptsList.AffirmationTwoIntroduction + affirmationTwo +
                     promptsList.AffirmationThreeIntroduction + affirmationThree;
@@ -84,7 +74,7 @@ namespace QweenIris
                 promptFormat.SetInstructions(promptsList.ParsePromptInstructions);
                 
 
-                var targetAnswer = await GetAppropriateAnswer(promptFormat, history, searchModel, pingAlive);
+                var targetAnswer = await GetAppropriateAnswer(promptFormat, promptContext.History, searchModel, pingAlive);
                 if (targetAnswer == 2)
                 {
                     mostProbableInformation = i;
@@ -104,23 +94,24 @@ namespace QweenIris
             {
                 Console.WriteLine("Oops");
             }
-            return GetCodedAnswer(targetModel, prompt, characterID, normalInstructions, codeInstructions, newsSearchInstructions);
+            return GetCodedAnswer(targetModel, promptContext);
         }
 
-        IAnswer GetCodedAnswer(int targetAnswer,string prompt, string characterID, string normalInstructions, string codeInstructions, string newsSearchInstructions)
+        IAnswer GetCodedAnswer(int targetAnswer, PromptContext promptContext)
+
         {
             switch (targetAnswer)
             {
                 case 0:
-                    return null;
+                    return new BasicAnswers(simpleModel).SetInstructions(promptContext.NormalInstructions); ;
                 case 1:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(promptContext.CharacterId);
                 case 2:
-                    return new CodeAnswer(complexModel).SetInstructions(codeInstructions);
+                    return new CodeAnswer(complexModel).SetInstructions(promptContext.CodeInstructions);
                 case 3:
-                    return new NewsSearch(pressModel, simpleModel).SetInstructions(newsSearchInstructions, normalInstructions);
+                    return new NewsSearch(pressModel, simpleModel).SetInstructions(promptContext.NewsSearchInstructions, promptContext.NormalInstructions);
                 default:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(characterID);
+                    return new ComplexAnswer(thinkingModel).SetInstructions(promptContext.CharacterId);
 
             }
         }

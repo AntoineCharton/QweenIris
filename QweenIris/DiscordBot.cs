@@ -43,7 +43,7 @@ namespace QweenIris
             return message;
         }
 
-        public DiscordBot(Action<string, string, string, string, string, string, string, string> action)
+        public DiscordBot(Action<PromptContext> action)
         {
             this.client = new DiscordSocketClient();
             messagesToDeleteIfOverriden = new List<RestUserMessage>();
@@ -68,8 +68,8 @@ namespace QweenIris
                             return;
                         messagesToDeleteIfOverriden.Clear();
                         Console.WriteLine("New message received:");
-                        var instruction = await GetLastMessagesOnChannel(instructionChannels.InstructionsChannelID);
-                        var characterInstruction = await GetLastMessagesOnChannel(instructionChannels.CharacterCardChannelID);
+                        var CharacterInstruction = await GetLastMessagesOnChannel(instructionChannels.InstructionsChannelID);
+                        var characterIDInstruction = await GetLastMessagesOnChannel(instructionChannels.CharacterCardChannelID);
                         var codeInstruction = await GetLastMessagesOnChannel(instructionChannels.CodeInstructionsChannelID);
                         var newsInstruction = await GetLastMessagesOnChannel(instructionChannels.NewsInstructionsChannelID);
 
@@ -102,7 +102,12 @@ namespace QweenIris
                         var messageLooked = 0;
                         foreach (var message in messages)
                         {
-                            action.Invoke(characterInstruction, instruction, codeInstruction, newsInstruction, parsedHistory, shortParsedHistory, message.Content, message.Author.Username);
+                            var promptContext = new PromptContext();
+                            promptContext.SetInstructions(characterIDInstruction, CharacterInstruction, codeInstruction, newsInstruction);
+                            promptContext.SetUser(message.Author.Username);
+                            promptContext.SetHistory(parsedHistory, shortParsedHistory);
+                            promptContext.SetPrompt(message.Content);
+                            action.Invoke(promptContext);
                         }
 
 
