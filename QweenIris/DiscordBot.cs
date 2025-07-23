@@ -2,6 +2,7 @@
 using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace QweenIris
 {
@@ -177,11 +178,33 @@ namespace QweenIris
 
         }
 
+        DateTime lastPingReceived;
+
         public async Task TriggerTyping()
         {
-            Console.WriteLine("Trigger typing");
-            var channel = client.GetChannel(chatChannelID) as SocketTextChannel;
-            await channel.TriggerTypingAsync();
+            var triggerPing = false;
+            if (lastPingReceived == null)
+            {
+                triggerPing = true;
+                lastPingReceived = DateTime.Now;
+            }
+
+
+            TimeSpan elapsed = DateTime.Now - lastPingReceived;
+            double seconds = elapsed.TotalSeconds;
+
+            if (elapsed.Seconds > 3)
+            {
+                lastPingReceived = DateTime.Now;
+                triggerPing = true;
+            }
+
+            if (triggerPing)
+            {
+                Console.WriteLine("Trigger typing");
+                var channel = client.GetChannel(chatChannelID) as SocketTextChannel;
+                await channel.TriggerTypingAsync();
+            }
         }
         public async Task StartAsync()
         {

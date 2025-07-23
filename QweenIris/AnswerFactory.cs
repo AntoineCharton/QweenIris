@@ -1,5 +1,4 @@
-﻿using Discord;
-using OllamaSharp;
+﻿using OllamaSharp;
 using OllamaSharp.Models;
 using System.Text;
 using System.Text.Json;
@@ -123,14 +122,7 @@ namespace QweenIris
             var Count = 0;
             try
             {
-
-                await foreach (var stream in OllamaFormater.GenerateResponse(model, prompt))
-                {
-                    if (Count % 500 == 0)
-                        pingAlive.Invoke();
-                    Count++;
-                    response += stream.Response;
-                }
+                response = await model.GenerateResponseWithPing(prompt, pingAlive);
             } catch
             {
                 pingAlive.Invoke();
@@ -207,13 +199,25 @@ namespace QweenIris
 
     public static class OllamaFormater
     {
-        public static async IAsyncEnumerable<GenerateResponseStream?> GenerateResponse(OllamaApiClient ollama, MessageContainer message)
+        public static async IAsyncEnumerable<GenerateResponseStream?> GenerateResponse(this OllamaApiClient ollama, MessageContainer message)
         {
             var prompt = message.GetJsonString();
             await foreach (var item in ollama.GenerateAsync(prompt))
             {
                 yield return item;
             }
+        }
+
+        public static async Task<string> GenerateResponseWithPing(this OllamaApiClient ollama, MessageContainer message, Action pingAlive)
+        {
+            var response = "";
+            await foreach (var stream in ollama.GenerateResponse(message))
+            {
+                pingAlive.Invoke();
+                response += stream.Response;
+            }
+
+            return response;
         }
     }
 

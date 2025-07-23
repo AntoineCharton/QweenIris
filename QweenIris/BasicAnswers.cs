@@ -30,10 +30,7 @@ namespace QweenIris
             var response = "";
             try
             {
-                await foreach (var stream in OllamaFormater.GenerateResponse(ollama, promptFormat))
-                {
-                    response += stream.Response;
-                }
+                response = await ollama.GenerateResponseWithPing(promptFormat, pingAlive);
             }
             catch (Exception e)
             {

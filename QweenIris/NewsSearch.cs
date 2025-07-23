@@ -85,16 +85,11 @@ namespace QweenIris
                     newsArticles += article.Items[i].ToString() + "\n";
                 }
 
-                var pickCount = 0;
                 var instruction = "Pick one article here that would match the user request. If the request is vague, pick articles that are good news or cover light subjects. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.";
                 var pickedArticle = "";
                 await foreach (var stream in normalModel.GenerateAsync(newsArticles + instruction + message))
                 {
-                    if (pickCount % 500 == 0)
-                    {
-                        pingAlive.Invoke();
-                    }
-                    pickCount++;
+                    pingAlive.Invoke();
                     pickedArticle += stream.Response;
                 }
                 pickedArticle = Regex.Replace(pickedArticle, @"<think>[\s\S]*?</think>", "");
@@ -192,14 +187,9 @@ namespace QweenIris
             if(numberOfArticles == 0)
             {
                 var nothingMessage = "";
-                var wordCount = 0;
                 await foreach (var stream in normalModel.GenerateAsync("User message: " + promptContext.Prompt + normalInstructionsToFollow + "Say you couldn't find anything. Do not include any link"))
                 {
-                    if (wordCount % 100 == 0)
-                    {
-                        pingAlive.Invoke();
-                    }
-                    wordCount++;
+                    pingAlive.Invoke();
                     nothingMessage += stream.Response;
                 }
                 nothingMessage = Regex.Replace(nothingMessage, @"<think>[\s\S]*?</think>", "");
@@ -214,14 +204,9 @@ namespace QweenIris
             var message = $"This is the message: '{promptContext.Prompt}'";
             var history = $"This is the history of the conversation: '{promptContext.History}'";
             pingAlive.Invoke();
-            var count = 0;
             await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))
             {
-                if (count % 500 == 0)
-                {
-                    pingAlive.Invoke();
-                }
-                count++;
+                pingAlive.Invoke();
                 response += stream.Response;
             }
             response = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
