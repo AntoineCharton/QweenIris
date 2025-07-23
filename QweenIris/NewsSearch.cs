@@ -193,11 +193,11 @@ namespace QweenIris
 
             /// Not using standard formating. For some reason this works way better with fewer aluscinations.
             var response = "";
-            var date = $"{mediaFeedList.dateIntroduction} {DateTime.Now.Year}";
+            var date = $"{mediaFeedList.DateIntroduction} {DateTime.Now.Year}";
             var formatedInstruction = $"'{newsInstructionsToFollow}'" + date;
-            var user = $"{mediaFeedList.userIntroduction} '{promptContext.User}'";
-            var message = $"{mediaFeedList.messageIntroduction} '{promptContext.Prompt}'";
-            var history = $"{mediaFeedList.historyIntroduction} '{promptContext.History}'";
+            var user = $"{mediaFeedList.UserIntroduction} '{promptContext.User}'";
+            var message = $"{mediaFeedList.MessageIntroduction} '{promptContext.Prompt}'";
+            var history = $"{mediaFeedList.HistoryIntroduction} '{promptContext.History}'";
             pingAlive.Invoke();
             await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))
             {
@@ -252,12 +252,12 @@ namespace QweenIris
         [JsonPropertyName("noArticleFoundInstructions")]
         public string NoArticleFoundInstructions { get; set; }
         [JsonPropertyName("dateIntroduction")]
-        public string dateIntroduction { get; set; }
+        public string DateIntroduction { get; set; }
         [JsonPropertyName("userIntroduction")]
-        public string userIntroduction { get; set; }
+        public string UserIntroduction { get; set; }
         [JsonPropertyName("messageIntroduction")]
-        public string messageIntroduction { get; set; }
+        public string MessageIntroduction { get; set; }
         [JsonPropertyName("historyIntroduction")]
-        public string historyIntroduction { get; set; }
+        public string HistoryIntroduction { get; set; }
     }
 }
