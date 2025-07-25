@@ -102,15 +102,17 @@ namespace QweenIris
             switch (targetAnswer)
             {
                 case 0:
-                    return new BasicAnswers(simpleModel).SetInstructions(promptContext.NormalInstructions); ;
+                    return new BasicAnswers(simpleModel).SetInstructions(promptContext.NormalInstructions);
                 case 1:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(promptContext.CharacterId);
+                    return new ComplexAnswer(complexModel).SetInstructions(promptContext.CharacterId);
                 case 2:
                     return new CodeAnswer(complexModel).SetInstructions(promptContext.CodeInstructions);
                 case 3:
-                    return new NewsSearch(pressModel, simpleModel).SetInstructions(promptContext.NewsSearchInstructions, promptContext.NormalInstructions);
+                    return new NewsSearch(pressModel, simpleModel, new WikipediaSearch(simpleModel, thinkingModel).SetInstructions(promptContext.CharacterId)).SetInstructions(promptContext.NewsSearchInstructions, promptContext.NormalInstructions);
+                case 4:
+                    return new WikipediaSearch(simpleModel, thinkingModel).SetInstructions(promptContext.CharacterId);
                 default:
-                    return new ComplexAnswer(thinkingModel).SetInstructions(promptContext.CharacterId);
+                    return new ComplexAnswer(complexModel).SetInstructions(promptContext.CharacterId);
 
             }
         }

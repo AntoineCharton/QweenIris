@@ -123,11 +123,16 @@ namespace QweenIris
 
         public async Task DeleteLastOverrideBotMessage()
         {
+            var messageToDeleteCopy = new List<RestUserMessage>();
+            for(var i = 0; i< messagesToDeleteIfOverriden.Count; i++)
+            {
+                messageToDeleteCopy.Add(messagesToDeleteIfOverriden[i]);
+            }
+            messagesToDeleteIfOverriden.Clear();
             await Task.Delay(500); // Waits for 1 second (1000 milliseconds)
-
             try
             {
-                foreach (var overrideMessage in messagesToDeleteIfOverriden)
+                foreach (var overrideMessage in messageToDeleteCopy)
                 {
                     var channel = client.GetChannel(overrideMessage.Channel.Id) as SocketTextChannel;
                     var message = await channel.GetMessageAsync(overrideMessage.Id);
@@ -137,9 +142,6 @@ namespace QweenIris
             {
                 ReplyAsync("Ooops couldn't delete messages", false);
             }
-            messagesToDeleteIfOverriden.Clear();
-
-
         }
 
         public async Task ReplyAsync(string response, bool deleteIfOveridden, bool isStackedMessage = false)

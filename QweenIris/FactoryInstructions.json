@@ -2,7 +2,7 @@
   "Prompts": [
     {
       "Prompt": "Researching factual information (e.g., “who was the first president of France?”, “how many countries use the euro?”)",
-      "Categories": 1
+      "Categories": 4
     },
     {
       "Prompt": "Looking for current events or recent updates (e.g., “what’s going on in Canada today?”, “Search online”)",

@@ -29,6 +29,7 @@ namespace QweenIris
 
         public Program()
         {
+            
             DisableQuickEditMode();
             Ollama.RestartOllama();
             discordBot = new DiscordBot(ReadMessage);
@@ -36,10 +37,12 @@ namespace QweenIris
             answerFactory = new AnswerFactory();
         }
 
-        private Task StartBotAsync()
+        private async Task StartBotAsync()
         {
+            
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            return discordBot.StartAsync();
+            await discordBot.StartAsync();
+            return;
         }
 
         private async void TriggerTyping()

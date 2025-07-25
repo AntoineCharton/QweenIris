@@ -14,9 +14,12 @@ namespace QweenIris
         private string newsInstructionsToFollow;
         private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
+        IAnswer fallBackAnswer;
+        string waitingAnswer;
 
-        public NewsSearch(OllamaApiClient newsModel, OllamaApiClient normalModel)
+        public NewsSearch(OllamaApiClient newsModel, OllamaApiClient normalModel, IAnswer fallbackAnswer)
         {
+            fallBackAnswer = fallbackAnswer;
             webFetcher = new WebFetcher();
             // set up the client
             this.newsModel = newsModel;
@@ -95,7 +98,7 @@ namespace QweenIris
                 if (pickedArticleId != -1)
                 {
                     Console.WriteLine(article.Items[pickedArticleId].ToString());
-                    await PushWaitingAnswer(feedback, $"{mediaFeedList.WaitingAnswerInstructions} \n {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
+                    await PushWaitingAnswer($"{mediaFeedList.WaitingAnswerInstructions} \n {normalInstructionsToFollow} \n article:{article.Items[pickedArticleId].ToString()}");
                     return "\n" + article.Items[pickedArticleId].ToString();
                 }
             }
@@ -107,7 +110,7 @@ namespace QweenIris
             return "";
         }
 
-        public async Task PushWaitingAnswer(Action<string, bool> feedback, string prompt)
+        public async Task PushWaitingAnswer(string prompt)
         {
             var waitingResponse = "";
             await foreach (var stream in normalModel.GenerateAsync(prompt))
@@ -115,7 +118,8 @@ namespace QweenIris
                 waitingResponse += stream.Response;
             }
             waitingResponse = Regex.Replace(waitingResponse, @"<think>[\s\S]*?</think>", "");
-            feedback.Invoke(waitingResponse, false);
+            waitingAnswer += waitingResponse + "\n";
+            //feedback.Invoke(waitingResponse, true);
         }
 
         public async Task<string> GenerateMatchingTags(Action<string, bool> feedback, string prompt)
@@ -159,7 +163,7 @@ namespace QweenIris
             categoriesToMatch.Add(pickedCategory);
             categoriesToMatch.Add("Any");
             KeepMatchedFeeds(mediaFeedList.MediaFeeds, categoriesToMatch.ToArray());
-            await PushWaitingAnswer(feedback, $"{mediaFeedList.AknowledgeSearchInstructions} {normalInstructionsToFollow} \n prompt:{promptContext.Prompt}");
+            await PushWaitingAnswer($"{mediaFeedList.AknowledgeSearchInstructions} {normalInstructionsToFollow} \n prompt:{promptContext.Prompt}");
             var relevantArticles = "";
             var numberOfArticles = 0;
            
@@ -188,6 +192,7 @@ namespace QweenIris
                     nothingMessage += stream.Response;
                 }
                 nothingMessage = Regex.Replace(nothingMessage, @"<think>[\s\S]*?</think>", "");
+                nothingMessage = await fallBackAnswer.GetAnswer(promptContext, feedback, pingAlive);
                 return nothingMessage;
             }
 
@@ -199,12 +204,27 @@ namespace QweenIris
             var message = $"{mediaFeedList.MessageIntroduction} '{promptContext.Prompt}'";
             var history = $"{mediaFeedList.HistoryIntroduction} '{promptContext.History}'";
             pingAlive.Invoke();
+            feedback.Invoke(waitingAnswer, true);
             await foreach (var stream in newsModel.GenerateAsync(formatedInstruction + relevantArticles + user + message))
             {
                 pingAlive.Invoke();
                 response += stream.Response;
             }
             response = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
+
+            var foundSomething = "";
+            await foreach (var stream in normalModel.GenerateAsync(mediaFeedList.NotResultOutput + response))
+            {
+                pingAlive.Invoke();
+                foundSomething += stream.Response;
+            }
+            foundSomething = Regex.Replace(foundSomething, @"<think>[\s\S]*?</think>", "");
+            var foundSomethingInt = int.Parse(foundSomething);
+            if(foundSomethingInt == 0)
+            {
+                response = await fallBackAnswer.GetAnswer(promptContext, feedback, pingAlive);
+            }
+
             return response;
         }
     }
@@ -259,5 +279,7 @@ namespace QweenIris
         public string MessageIntroduction { get; set; }
         [JsonPropertyName("historyIntroduction")]
         public string HistoryIntroduction { get; set; }
+        [JsonPropertyName("noResultOutput")]
+        public string NotResultOutput { get; set; }
     }
 }
