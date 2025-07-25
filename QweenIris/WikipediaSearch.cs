@@ -50,7 +50,7 @@ namespace QweenIris
         {
             var searchWikipediaPrompt = new MessageContainer();
             searchWikipediaPrompt.SetContext("History:");
-            searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give the important keywords. Ex: User ask what is happening in mumbai output: mumbai. No explanation, no formating just the words" + promptContext.Prompt);
+            searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give the important keywords. Ex: User ask what is happening in mumbai output: mumbai. No explanation, no formating just the words \n prompt:" + promptContext.Prompt);
             searchWikipediaPrompt.SetInstructions("");
             var searchFormat = "";
             searchFormat = await thinkingModel.GenerateResponseWithPing(searchWikipediaPrompt, pingAlive);

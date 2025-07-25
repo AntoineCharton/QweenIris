@@ -25,6 +25,10 @@
       "Categories": 0
     },
     {
+      "Prompt": "personnal conversation (e.g., “What is your name?”, “what is my name?”, “how old are you?”)",
+      "Categories": 1
+    },
+    {
       "Prompt": "Casual conversation (e.g., “what's up?”, “how are you”, “let's talk'”)",
       "Categories": 1
     },
