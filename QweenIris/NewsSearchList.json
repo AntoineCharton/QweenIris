@@ -116,16 +116,7 @@
       "rss": "https://www.undercurrentnews.com/feed/"
     }
   ],
-
-  "searchArticleInstructions": "Pick one article here that would match the user request. If the request is vague, pick articles that are good news or cover light subjects. Only output the number associated with that article. If nothing is found just output -1. No explanation, no extra text — just the number.",
-  "waitingAnswerInstructions": "Instructions: Describe what you see. End your sentance by 'I am looking for an article for you.'.",
   "generateMatchingTagsIntro": "Which one of those categories matches the best the request: ",
   "generateMatchingTagsInstructions": "your instructions are to pick one that matches the user prompt best. Return only the category, no explanation. ",
-  "aknowledgeSearchInstructions": "Instructions: Say you are going to search for what the user asked for. End your sentance by 'I am looking for an article.'.",
-  "noArticleFoundInstructions": "Say you couldn't find anything. Do not include any link",
-  "dateIntroduction": "This is the year:",
-  "userIntroduction": "The user name is: ",
-  "messageIntroduction": "This is the message: ",
-  "historyIntroduction": "This is the history of the conversation: ",
-  "noResultOutput": "Is this sentance telling the user it didn't find anything? if nothing was found say 0, if something was found say 1. 0 or 1, no explanation just the number. This is the sentence:"
+  "noArticleFoundInstructions": "Say you couldn't find anything. Do not include any link"
 }

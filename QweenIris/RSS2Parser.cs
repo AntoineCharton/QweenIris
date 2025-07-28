@@ -48,7 +48,7 @@ namespace QweenIris
 
             public override string ToString()
             {
-                return $@"Title: {Title} Description: {Description} PubDate: {PubDate:yyyy-MM-dd HH:mm} Link: {Link}";
+                return $"Title: {Title}\n Description: {Description}\n";
             }
         }
     }

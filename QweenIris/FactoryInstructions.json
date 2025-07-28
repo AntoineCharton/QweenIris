@@ -30,7 +30,7 @@
     },
     {
       "Prompt": "Casual conversation (e.g., “what's up?”, “how are you”, “let's talk'”)",
-      "Categories": 1
+      "Categories": 0
     },
     {
       "Prompt": "User is refering to a past conversation (e.g., “What do you mean?”,  “What did we talk about?”)",
@@ -55,7 +55,7 @@
   "AffirmationThreeIntroduction": " \n Affirmation three: ",
   "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation two, 3 if affirmation three. Return only a number 1, 2 or 3 no explanation.",
   "SimpleModel": "gemma3:4b",
-  "ThinkingModel": "qwen3",
-  "PressModel": "qwen3",
+  "ThinkingModel": "qwen3:1.7b",
+  "PressModel": "gemma3:4b",
   "ComplexModel": "qwen3"
 }
