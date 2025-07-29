@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace QweenIris
 {
@@ -18,6 +19,7 @@ namespace QweenIris
         private readonly OllamaApiClient quickModel;
         private readonly OllamaApiClient thinkingModel;
         private string instructionsToFollow;
+
         public WikipediaSearch(OllamaApiClient quickModel, OllamaApiClient thinkingModel)
         {
             this.quickModel = quickModel;
@@ -50,7 +52,7 @@ namespace QweenIris
         {
             var searchWikipediaPrompt = new MessageContainer();
             searchWikipediaPrompt.SetContext("History:");
-            searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give the important keywords. Ex: User ask what is happening in mumbai output: mumbai. No explanation, no formating just the words \n prompt:" + promptContext.Prompt);
+            searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give the important keywords. Ex: User ask what happened in mumbai on 2024 output: mumbai 2024. No explanation, no formating just the words \n prompt:" + promptContext.Prompt);
             searchWikipediaPrompt.SetInstructions("");
             var searchFormat = "";
             searchFormat = await thinkingModel.GenerateResponseWithPing(searchWikipediaPrompt, pingAlive);
@@ -60,7 +62,7 @@ namespace QweenIris
 
             if(text.Count == 0)
             {
-                searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give one important keywords. Ex: User ask what is happening in mumbai output: mumbai. No explanation, no formating just the words" + promptContext.Prompt);
+                searchWikipediaPrompt.SetUserPrompt("Make a search that could be used on wikipedia search. Only give the important keywords. Ex: User ask what happened in mumbai on 2024 output: mumbai 2024. No explanation, no formating just the words \n prompt:" + promptContext.Prompt);
                 searchFormat = await thinkingModel.GenerateResponseWithPing(searchWikipediaPrompt, pingAlive);
                 search = Regex.Replace(searchFormat, @"<think>[\s\S]*?</think>", "");
                 text = await SearchAndFetchPages(search);
@@ -70,10 +72,13 @@ namespace QweenIris
                     return "Something went wrong :(";
                 }
             }
-            Console.WriteLine("Wikipedia text: " + text[0] + " ");
+            //Console.WriteLine("Wikipedia text: " + text[0] + " ");
+            Console.WriteLine(text[0].Length);
+            var sortedText = text[0];
+            
             var searchInformationPrompt = new MessageContainer();
             searchInformationPrompt.SetContext("History:");
-            searchInformationPrompt.SetUserPrompt("This is the article" + text[0] + "Quote this article accordingly: " + promptContext.Prompt);
+            searchInformationPrompt.SetUserPrompt("This is the article" + sortedText + "Quote this article accordingly. Focus only on answering the prompt question specifically do not add information not asked for: " + promptContext.Prompt);
             searchInformationPrompt.SetInstructions("");
             var information = "";
             information = await thinkingModel.GenerateResponseWithPing(searchInformationPrompt, pingAlive);

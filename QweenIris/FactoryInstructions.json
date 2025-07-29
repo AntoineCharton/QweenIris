@@ -5,6 +5,10 @@
       "Categories": 4
     },
     {
+      "Prompt": "Asking to search on the internet specifically (e.g., “look on wikipedia the latin name of cat”, “look online”)",
+      "Categories": 4
+    },
+    {
       "Prompt": "Looking for current events or recent updates (e.g., “what’s going on in Canada today?”, “Search online”)",
       "Categories": 3
     },
@@ -27,6 +31,10 @@
     {
       "Prompt": "personnal conversation (e.g., “What is your name?”, “what is my name?”, “how old are you?”)",
       "Categories": 1
+    },
+    {
+      "Prompt": "asking for skills (e.g., “Are you good with spreadsheets?”, “Are you a good accountant?”)",
+      "Categories": 0
     },
     {
       "Prompt": "Casual conversation (e.g., “what's up?”, “how are you”, “let's talk'”)",
