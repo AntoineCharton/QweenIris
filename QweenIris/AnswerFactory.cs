@@ -3,6 +3,7 @@ using OllamaSharp.Models;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace QweenIris
 {
@@ -42,7 +43,7 @@ namespace QweenIris
             return count;
         }
 
-        public async Task<IAnswer> GetAnswer(PromptContext promptContext, Action pingAlive, Action<string, bool> feedback)
+        public async Task<IAnswer> GetAnswer(PromptContext promptContext, Action pingAlive, Action<string, bool> feedback, CancellationToken cancellationToken)
         {
             var codeElements = CountBraces(promptContext.Prompt);
             Console.WriteLine(codeElements);
@@ -73,7 +74,7 @@ namespace QweenIris
                 promptFormat.SetInstructions(promptsList.ParsePromptInstructions);
                 
 
-                var targetAnswer = await GetAppropriateAnswer(promptFormat, promptContext.History, searchModel, pingAlive);
+                var targetAnswer = await GetAppropriateAnswer(promptFormat, promptContext.History, searchModel, pingAlive, cancellationToken);
                 if (targetAnswer == 2)
                 {
                     mostProbableInformation = i;
@@ -93,42 +94,45 @@ namespace QweenIris
             {
                 Console.WriteLine("Oops");
             }
-            return GetCodedAnswer(targetModel, promptContext);
+            return GetCodedAnswer(targetModel, promptContext, cancellationToken);
         }
 
-        IAnswer GetCodedAnswer(int targetAnswer, PromptContext promptContext)
+        IAnswer GetCodedAnswer(int targetAnswer, PromptContext promptContext, CancellationToken cancellationToken)
 
         {
             switch (targetAnswer)
             {
                 case 0:
-                    return new BasicAnswers(simpleModel).SetInstructions(promptContext.NormalInstructions);
+                    return new BasicAnswers(simpleModel, cancellationToken).SetInstructions(promptContext.NormalInstructions);
                 case 1:
-                    return new ComplexAnswer(complexModel).SetInstructions(promptContext.CharacterId);
+                    return new ComplexAnswer(complexModel, cancellationToken).SetInstructions(promptContext.CharacterId);
                 case 2:
                     return new CodeAnswer(complexModel).SetInstructions(promptContext.CodeInstructions);
                 case 3:
-                    return new NewsSearch(pressModel, new WikipediaSearch(simpleModel, complexModel).SetInstructions(promptContext.CharacterId)).SetInstructions(promptContext.NormalInstructions);
+                    return new NewsSearch(pressModel, new WikipediaSearch(simpleModel, thinkingModel, cancellationToken).SetInstructions(promptContext.CharacterId), cancellationToken).SetInstructions(promptContext.NormalInstructions);
                 case 4:
-                    return new WikipediaSearch(simpleModel, complexModel).SetInstructions(promptContext.CharacterId);
+                    return new WikipediaSearch(simpleModel, thinkingModel, cancellationToken).SetInstructions(promptContext.CharacterId);
                 default:
-                    return new ComplexAnswer(complexModel).SetInstructions(promptContext.CharacterId);
+                    return new ComplexAnswer(complexModel, cancellationToken).SetInstructions(promptContext.CharacterId);
 
             }
         }
 
-        public async Task<int> GetAppropriateAnswer(MessageContainer prompt, string history, OllamaApiClient model, Action pingAlive)
+        public async Task<int> GetAppropriateAnswer(MessageContainer prompt, string history, OllamaApiClient model, Action pingAlive, CancellationToken cancellationToken)
         {
             var instruction = promptsList;
             var response = "";
             var Count = 0;
             try
             {
-                response = await model.GenerateResponseWithPing(prompt, pingAlive);
+                response = await model.GenerateResponseWithPing(prompt, pingAlive, cancellationToken);
+            } catch (OperationCanceledException)
+            {
+               
             } catch
             {
                 pingAlive.Invoke();
-                await GetAppropriateAnswer(prompt, history, model, pingAlive);
+                await GetAppropriateAnswer(prompt, history, model, pingAlive, cancellationToken);
             }
             string output = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
             try
@@ -210,11 +214,12 @@ namespace QweenIris
             }
         }
 
-        public static async Task<string> GenerateResponseWithPing(this OllamaApiClient ollama, MessageContainer message, Action pingAlive)
+        public static async Task<string> GenerateResponseWithPing(this OllamaApiClient ollama, MessageContainer message, Action pingAlive, CancellationToken cancellationToken)
         {
             var response = "";
             await foreach (var stream in ollama.GenerateResponse(message))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 pingAlive.Invoke();
                 response += stream.Response;
             }

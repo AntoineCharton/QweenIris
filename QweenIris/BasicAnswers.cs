@@ -7,9 +7,11 @@ namespace QweenIris
     {
         private readonly OllamaApiClient ollama;
         private string instructionsToFollow;
+        private CancellationToken token;
 
-        public BasicAnswers(OllamaApiClient model) {
+        public BasicAnswers(OllamaApiClient model, CancellationToken token) {
             ollama = model;
+            this.token = token;
         }
 
         public BasicAnswers SetInstructions(string instructions)
@@ -29,7 +31,7 @@ namespace QweenIris
             var response = "";
             try
             {
-                response = await ollama.GenerateResponseWithPing(promptFormat, pingAlive);
+                response = await ollama.GenerateResponseWithPing(promptFormat, pingAlive, token);
             }
             catch (Exception e)
             {

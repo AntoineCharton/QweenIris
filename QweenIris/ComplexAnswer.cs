@@ -7,11 +7,13 @@ namespace QweenIris
     {
         private readonly OllamaApiClient ollama;
         private string instructionsToFollow;
+        CancellationToken cancellationToken;
 
-        public ComplexAnswer(OllamaApiClient model)
+        public ComplexAnswer(OllamaApiClient model, CancellationToken cancellationToken)
         {
             // set up the client
             ollama = model;
+            this.cancellationToken = cancellationToken;
         }
 
         public ComplexAnswer SetInstructions(string instructions)
@@ -31,7 +33,7 @@ namespace QweenIris
             var response = "";
             //feedback.Invoke("Give me a moment", true);
             pingAlive.Invoke();
-            response = await ollama.GenerateResponseWithPing(promptFormat, pingAlive);
+            response = await ollama.GenerateResponseWithPing(promptFormat, pingAlive, cancellationToken);
             Console.WriteLine(response);
             string output = Regex.Replace(response, @"<think>[\s\S]*?</think>", "");
             return output;

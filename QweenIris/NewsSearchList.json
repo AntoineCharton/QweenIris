@@ -6,11 +6,6 @@
       "rss": "http://feeds.bbci.co.uk/news/world/rss.xml"
     },
     {
-      "name": "CNN",
-      "categories": [ "America", "World", "Politics" ],
-      "rss": "http://rss.cnn.com/rss/edition.rss"
-    },
-    {
       "name": "The New York Times",
       "categories": [ "America", "Politics", "World" ],
       "rss": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"

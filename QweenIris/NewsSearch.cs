@@ -13,8 +13,9 @@ namespace QweenIris
         private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
         IAnswer fallBackAnswer;
+        CancellationToken cancellationToken;
 
-        public NewsSearch(OllamaApiClient newsModel, IAnswer fallbackAnswer)
+        public NewsSearch(OllamaApiClient newsModel, IAnswer fallbackAnswer, CancellationToken cancellationToken)
         {
             fallBackAnswer = fallbackAnswer;
             webFetcher = new WebFetcher();
@@ -23,6 +24,7 @@ namespace QweenIris
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewsSearchList.json");
             string json = File.ReadAllText(path, Encoding.UTF8);
             mediaFeedList = JsonSerializer.Deserialize<MediaFeedList>(json);
+            this.cancellationToken = cancellationToken;
         }
 
         public NewsSearch SetInstructions(string normalInstructions)
@@ -206,6 +208,7 @@ namespace QweenIris
             feedback.Invoke("I am looking for an article", true);
             foreach (var feed in mediaFeedList.MediaFeeds)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var newArticle = await GetRelevantArticle(feed.Rss, promptContext, pingAlive, feedback);
                 relevantArticles += (newArticle + "\n---");
                 if(!string.IsNullOrWhiteSpace(newArticle))

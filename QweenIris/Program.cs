@@ -7,10 +7,11 @@ namespace QweenIris
 
     internal class Program
     {
-        private readonly WebFetcher webFetcher;
         private readonly DiscordBot discordBot;
         private readonly AnswerFactory answerFactory;
         private int readMessageCount;
+        private CancellationTokenSource cancellationTokenSource;
+        private int numberOfMessagesToRead;
 
         static void Main(string[] args) =>
             new Program().StartBotAsync().GetAwaiter().GetResult();
@@ -33,7 +34,6 @@ namespace QweenIris
             DisableQuickEditMode();
             Ollama.RestartOllama();
             discordBot = new DiscordBot(ReadMessage);
-            webFetcher = new WebFetcher();
             answerFactory = new AnswerFactory();
         }
 
@@ -57,22 +57,54 @@ namespace QweenIris
 
         private async void ReadMessage(PromptContext promptContext)
         {
-            Console.WriteLine(" " + promptContext.Prompt);
-            TriggerTyping();
-            var answerProvider = await answerFactory.GetAnswer(promptContext, TriggerTyping, sendMessage);
-            if (answerProvider != null)
+            if(cancellationTokenSource != null)
             {
-                var answer = await answerProvider.GetAnswer(promptContext, sendMessage, TriggerTyping);
-                readMessageCount++;
-                Console.WriteLine(" " + answer);
-                await discordBot.ReplyAsync(answer, false);
-                if (readMessageCount > 30)
+                try
                 {
-                    readMessageCount = 0;
-                    Ollama.RestartOllama();
-                    Console.WriteLine("Restarting Ollama");
+                    cancellationTokenSource.Cancel();
+                    cancellationTokenSource.Dispose();
+                } catch
+                {
                 }
             }
+            if (numberOfMessagesToRead > 0)
+            {
+                sendMessage("You are typing to fast for me", false);
+                return;
+            }
+            cancellationTokenSource = new CancellationTokenSource();
+            Console.WriteLine(" " + promptContext.Prompt);
+            TriggerTyping();
+            numberOfMessagesToRead++;
+            try
+            {
+                var answerProvider = await answerFactory.GetAnswer(promptContext, TriggerTyping, sendMessage, cancellationTokenSource.Token);
+                var answer = "";
+                if (answerProvider != null)
+                {
+
+                    answer = await answerProvider.GetAnswer(promptContext, sendMessage, TriggerTyping);
+                    readMessageCount++;
+                    Console.WriteLine(" " + answer);
+                    await discordBot.ReplyAsync(answer, false);
+                    if (readMessageCount > 30)
+                    {
+                        readMessageCount = 0;
+                        Ollama.RestartOllama();
+                        Console.WriteLine("Restarting Ollama");
+                    }
+                    if (cancellationTokenSource != null)
+                    {
+                        cancellationTokenSource.Dispose();
+                        cancellationTokenSource = null;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                sendMessage("I didn't have time to finish :(", false);
+            }
+            numberOfMessagesToRead--;
         }
     }
 
