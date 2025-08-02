@@ -109,7 +109,7 @@ namespace QweenIris
                 case 2:
                     return new CodeAnswer(complexModel).SetInstructions(promptContext.CodeInstructions);
                 case 3:
-                    return new NewsSearch(pressModel, new WikipediaSearch(simpleModel, thinkingModel, cancellationToken).SetInstructions(promptContext.CharacterId), cancellationToken).SetInstructions(promptContext.NormalInstructions);
+                    return new NewsSearch(simpleModel, pressModel, new WikipediaSearch(simpleModel, thinkingModel, cancellationToken).SetInstructions(promptContext.CharacterId), cancellationToken).SetInstructions(promptContext.NormalInstructions);
                 case 4:
                     return new WikipediaSearch(simpleModel, thinkingModel, cancellationToken).SetInstructions(promptContext.CharacterId);
                 default:

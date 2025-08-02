@@ -9,18 +9,20 @@ namespace QweenIris
     internal class NewsSearch : IAnswer
     {
         private readonly OllamaApiClient newsModel;
+        private readonly OllamaApiClient thinkingModel;
         private readonly WebFetcher webFetcher;
         private string normalInstructionsToFollow;
         MediaFeedList mediaFeedList;
         IAnswer fallBackAnswer;
         CancellationToken cancellationToken;
 
-        public NewsSearch(OllamaApiClient newsModel, IAnswer fallbackAnswer, CancellationToken cancellationToken)
+        public NewsSearch(OllamaApiClient newsModel, OllamaApiClient thinkingModel, IAnswer fallbackAnswer, CancellationToken cancellationToken)
         {
             fallBackAnswer = fallbackAnswer;
             webFetcher = new WebFetcher();
             // set up the client
             this.newsModel = newsModel;
+            this.thinkingModel = thinkingModel;
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NewsSearchList.json");
             string json = File.ReadAllText(path, Encoding.UTF8);
             mediaFeedList = JsonSerializer.Deserialize<MediaFeedList>(json);
@@ -70,10 +72,10 @@ namespace QweenIris
             }
         }
 
-        async Task<bool> IsArticleRelevant(RSS2Parser.NewsItem item, string prompt, Action pingAlive)
+        async Task<bool> IsArticleRelevant(RSS2Parser.NewsItem item, OllamaApiClient model, string prompt, Action pingAlive)
         {
             var isArticleRelevant = "";
-            await foreach (var stream in newsModel.GenerateAsync("Instructions: yes or no is this article related to the prompt, just yes or no, no explanation, just the words \n article:" + 
+            await foreach (var stream in model.GenerateAsync("Instructions: yes or no is this article related to the prompt, just yes or no, no explanation, just the words \n article:" + 
                 item.ToString() +
                 "\nPrompt: " + prompt))
             {
@@ -129,14 +131,16 @@ namespace QweenIris
                 var newsCount = 0;
                 for (var i = 0; i < MathF.Min(article.Items.Count, 30); i++)
                 {
-                    if(await IsArticleRelevant(article.Items[i], message.Prompt, pingAlive))
+                    if(await IsArticleRelevant(article.Items[i], newsModel, message.Prompt, pingAlive))
                     {
-                        newsCount++;
-                        var selectedItem = article.Items[i];
-                        selectedItem.Description = await RemoveHTMLAndMarkdownLinksFromText(selectedItem.Description, pingAlive);
-                        relevantItems.Add(selectedItem);
-                        if (newsCount > 1)
+                        if (await IsArticleRelevant(article.Items[i], thinkingModel, message.Prompt, pingAlive)) // We make sur the article is relevant with a stronger but slower model
+                        {
+                            newsCount++;
+                            var selectedItem = article.Items[i];
+                            selectedItem.Description = await RemoveHTMLAndMarkdownLinksFromText(selectedItem.Description, pingAlive);
+                            relevantItems.Add(selectedItem);
                             break;
+                        }
                     }
                 }
 
@@ -220,7 +224,7 @@ namespace QweenIris
                     numberOfArticles++;
                 }
 
-                if(numberOfArticles > 1)
+                if(numberOfArticles > 2)
                 {
                     break;
                 }

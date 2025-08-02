@@ -109,7 +109,18 @@
       "name": "Undercurrentnews",
       "categories": [ "Sea Food", "America", "Environment" ],
       "rss": "https://www.undercurrentnews.com/feed/"
+    },
+    {
+      "name": "mercopress",
+      "categories": [ "South America", "World" ],
+      "rss": "https://en.mercopress.com/rss/"
+    },
+    {
+      "name": "euronews",
+      "categories": [ "Europe", "World"],
+      "rss": "https://www.euronews.com/rss"
     }
+
   ],
   "generateMatchingTagsIntro": "Which one of those categories matches the best the request: ",
   "generateMatchingTagsInstructions": "your instructions are to pick one that matches the user prompt best. Return only the category, no explanation. ",

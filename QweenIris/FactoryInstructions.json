@@ -64,6 +64,6 @@
   "ParsePromptInstructions": " \n Which one of those affirmations represent best the user intent. Return 1 if affirmation one, 2 if affirmation two, 3 if affirmation three. Return only a number 1, 2 or 3 no explanation.",
   "SimpleModel": "gemma3:4b",
   "ThinkingModel": "qwen3:4b",
-  "PressModel": "gemma3:4b",
+  "PressModel": "qwen3:0.6b",
   "ComplexModel": "qwen3"
 }

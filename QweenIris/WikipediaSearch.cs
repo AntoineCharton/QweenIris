@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Microsoft.VisualBasic;
 using OllamaSharp;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
@@ -107,7 +108,15 @@ namespace QweenIris
                 }
             }
 
-            return longestPotentialAnswer;
+            var partialAnswer = new MessageContainer();
+            partialAnswer.SetContext("");
+            partialAnswer.SetInstructions("Answer the questions");
+            partialAnswer.SetUserPrompt(promptContext.Prompt);
+            var modelAnswer = await thinkingModel.GenerateResponseWithPing(partialAnswer, pingAlive, cancellationToken);
+            modelAnswer = Regex.Replace(modelAnswer, @"<think>[\s\S]*?</think>", "");
+            modelAnswer = "# Partial, potentialy inacurate, outdated or out of context answer detected please verify information \n\n## Model answer: \n" + modelAnswer;
+            modelAnswer = modelAnswer + "\n\n## Online answer: " + longestPotentialAnswer;
+            return modelAnswer;
         }
 
         public static List<string> SplitEvery2000(string text)
@@ -127,7 +136,7 @@ namespace QweenIris
         {
             var searchInformationPrompt = new MessageContainer();
             searchInformationPrompt.SetContext("");
-            searchInformationPrompt.SetUserPrompt($"Prompt: {asnwer} + \n Answer 1 if the prompt says 'nothing found'. Otherwise 0. No explanation. Just 1 or 0 .");
+            searchInformationPrompt.SetUserPrompt($"Prompt: {asnwer} + \n Answer 1 if the prompt says 'nothing found'. Otherwise 0. No explanation. Just 1 or 0.");
             searchInformationPrompt.SetInstructions("");
             var isAnswering = "";
             isAnswering = await quickModel.GenerateResponseWithPing(searchInformationPrompt, pingAlive, cancellationToken);
