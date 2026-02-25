@@ -39,10 +39,8 @@ namespace QweenIris
 
         private async Task StartBotAsync()
         {
-            
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             await discordBot.StartAsync();
-            return;
         }
 
         private async void TriggerTyping()

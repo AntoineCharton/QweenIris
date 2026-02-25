@@ -1,11 +1,6 @@
-﻿using Discord;
-using Microsoft.VisualBasic;
-using OllamaSharp;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
+﻿using OllamaSharp;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace QweenIris
 {
@@ -166,10 +161,14 @@ namespace QweenIris
         {
             var url = FormatURL(query, limit);
             var contents = new List<string>();
-
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "QweenIRISPersonalProject/1.0 (antoine.charton@gmail.com)"
+            );
             try
             {
+                Console.WriteLine(url);
                 var response = await httpClient.GetStringAsync(url);
+                Console.WriteLine(response);
                 using var searchDoc = JsonDocument.Parse(response);
                 var searchResults = searchDoc.RootElement.GetProperty("query").GetProperty("search");
 
